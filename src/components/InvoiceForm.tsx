@@ -20,6 +20,8 @@ interface InvoiceFormProps {
 const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }: InvoiceFormProps) => {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [newClientName, setNewClientName] = useState('');
+  const [newClientAddress, setNewClientAddress] = useState('');
+  const [newClientPhone, setNewClientPhone] = useState('');
   const [showNewClient, setShowNewClient] = useState(false);
   
   const [workDescription, setWorkDescription] = useState('');
@@ -51,8 +53,14 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
 
   const handleAddNewClient = () => {
     if (newClientName.trim()) {
-      onAddClient({ name: newClientName.trim() });
+      onAddClient({ 
+        name: newClientName.trim(),
+        address: newClientAddress.trim() || undefined,
+        phone: newClientPhone.trim() || undefined,
+      });
       setNewClientName('');
+      setNewClientAddress('');
+      setNewClientPhone('');
       setShowNewClient(false);
     }
   };
@@ -143,19 +151,35 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
           </div>
 
           {showNewClient && (
-            <div className="flex gap-2 p-4 bg-secondary/50 rounded-lg">
-              <Input
-                placeholder="Nom du nouveau client"
-                value={newClientName}
-                onChange={(e) => setNewClientName(e.target.value)}
-                className="flex-1"
-              />
-              <Button onClick={handleAddNewClient} disabled={!newClientName.trim()}>
-                Créer
-              </Button>
-              <Button variant="ghost" onClick={() => setShowNewClient(false)}>
-                <X className="w-4 h-4" />
-              </Button>
+            <div className="flex flex-col gap-3 p-4 bg-secondary/50 rounded-lg">
+              <div className="flex flex-col md:flex-row gap-2">
+                <Input
+                  placeholder="Nom du nouveau client"
+                  value={newClientName}
+                  onChange={(e) => setNewClientName(e.target.value)}
+                  className="flex-1"
+                />
+                <Input
+                  placeholder="Adresse (optionnel)"
+                  value={newClientAddress}
+                  onChange={(e) => setNewClientAddress(e.target.value)}
+                  className="flex-1"
+                />
+                <Input
+                  placeholder="Téléphone (optionnel)"
+                  value={newClientPhone}
+                  onChange={(e) => setNewClientPhone(e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button onClick={handleAddNewClient} disabled={!newClientName.trim()}>
+                  Créer
+                </Button>
+                <Button variant="ghost" onClick={() => setShowNewClient(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           )}
 
