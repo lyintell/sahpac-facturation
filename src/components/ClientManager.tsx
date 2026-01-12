@@ -25,9 +25,11 @@ interface ClientManagerProps {
 const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }: ClientManagerProps) => {
   const [newClientName, setNewClientName] = useState('');
   const [newClientAddress, setNewClientAddress] = useState('');
+  const [newClientPhone, setNewClientPhone] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editAddress, setEditAddress] = useState('');
+  const [editPhone, setEditPhone] = useState('');
   const [deleteClient, setDeleteClient] = useState<Client | null>(null);
 
   const handleAddClient = () => {
@@ -35,9 +37,11 @@ const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }:
       onAddClient({
         name: newClientName.trim(),
         address: newClientAddress.trim() || undefined,
+        phone: newClientPhone.trim() || undefined,
       });
       setNewClientName('');
       setNewClientAddress('');
+      setNewClientPhone('');
     }
   };
 
@@ -45,6 +49,7 @@ const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }:
     setEditingId(client.id);
     setEditName(client.name);
     setEditAddress(client.address || '');
+    setEditPhone(client.phone || '');
   };
 
   const saveEdit = () => {
@@ -52,6 +57,7 @@ const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }:
       onUpdateClient(editingId, {
         name: editName.trim(),
         address: editAddress.trim() || undefined,
+        phone: editPhone.trim() || undefined,
       });
       setEditingId(null);
     }
@@ -92,6 +98,12 @@ const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }:
                 onChange={(e) => setNewClientAddress(e.target.value)}
                 className="flex-1"
               />
+              <Input
+                placeholder="Téléphone (optionnel)"
+                value={newClientPhone}
+                onChange={(e) => setNewClientPhone(e.target.value)}
+                className="flex-1"
+              />
               <Button onClick={handleAddClient} disabled={!newClientName.trim()}>
                 <Plus className="w-4 h-4 mr-2" />
                 Ajouter
@@ -130,12 +142,21 @@ const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }:
                           placeholder="Adresse"
                           className="flex-1"
                         />
+                        <Input
+                          value={editPhone}
+                          onChange={(e) => setEditPhone(e.target.value)}
+                          placeholder="Téléphone"
+                          className="flex-1"
+                        />
                       </div>
                     ) : (
                       <div className="flex-1">
                         <p className="font-medium">{client.name}</p>
                         {client.address && (
                           <p className="text-sm text-muted-foreground">{client.address}</p>
+                        )}
+                        {client.phone && (
+                          <p className="text-sm text-muted-foreground">Tél: {client.phone}</p>
                         )}
                       </div>
                     )}
