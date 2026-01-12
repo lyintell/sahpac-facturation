@@ -168,12 +168,14 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
                   <span>Soit au forfait</span>
                   <span className="font-medium">{invoice.amountHT.toLocaleString('fr-FR')} F</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>TVA {invoice.tvaRate}%</span>
-                  <span className="font-medium">{invoice.tvaAmount.toLocaleString('fr-FR')} F</span>
-                </div>
+                {invoice.tvaRate > 0 && (
+                  <div className="flex justify-between">
+                    <span>TVA {invoice.tvaRate}%</span>
+                    <span className="font-medium">{invoice.tvaAmount.toLocaleString('fr-FR')} F</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
-                  <span>Total</span>
+                  <span>Total{invoice.tvaRate > 0 ? ' TTC' : ''}</span>
                   <span>{invoice.totalAmount.toLocaleString('fr-FR')} F</span>
                 </div>
               </div>

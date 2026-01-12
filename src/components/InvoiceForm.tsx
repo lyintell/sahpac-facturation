@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Client, Invoice, ZoneIntervention, INTERVENTION_TYPES, DEFAULT_TVA_RATE } from '@/types';
 
 interface InvoiceFormProps {
@@ -33,13 +34,15 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
   
   const [amountHT, setAmountHT] = useState('');
   const [tvaRate] = useState(DEFAULT_TVA_RATE);
+  const [includeTva, setIncludeTva] = useState(true);
 
   const selectedIntervention = INTERVENTION_TYPES.find(t => t.id === selectedInterventionId);
   
   const tvaAmount = useMemo(() => {
+    if (!includeTva) return 0;
     const ht = parseFloat(amountHT) || 0;
     return ht * (tvaRate / 100);
-  }, [amountHT, tvaRate]);
+  }, [amountHT, tvaRate, includeTva]);
 
   const totalAmount = useMemo(() => {
     const ht = parseFloat(amountHT) || 0;
@@ -90,7 +93,7 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
       frequency,
       findings,
       amountHT: parseFloat(amountHT) || 0,
-      tvaRate,
+      tvaRate: includeTva ? tvaRate : 0,
       tvaAmount,
       totalAmount,
     };
@@ -288,6 +291,17 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
           <CardTitle>Montants</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center space-x-3 pb-2 border-b">
+            <Switch
+              id="include-tva"
+              checked={includeTva}
+              onCheckedChange={setIncludeTva}
+            />
+            <Label htmlFor="include-tva" className="cursor-pointer">
+              Appliquer la TVA ({tvaRate}%)
+            </Label>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Montant HT (FCFA)</Label>
@@ -299,18 +313,20 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>TVA ({tvaRate}%)</Label>
-              <Input
-                type="text"
-                value={tvaAmount.toLocaleString('fr-FR')}
-                disabled
-                className="bg-muted"
-              />
-            </div>
+            {includeTva && (
+              <div className="space-y-2">
+                <Label>TVA ({tvaRate}%)</Label>
+                <Input
+                  type="text"
+                  value={tvaAmount.toLocaleString('fr-FR')}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
-              <Label>Total TTC (FCFA)</Label>
+              <Label>{includeTva ? 'Total TTC' : 'Total'} (FCFA)</Label>
               <Input
                 type="text"
                 value={totalAmount.toLocaleString('fr-FR')}
