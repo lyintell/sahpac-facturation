@@ -1,8 +1,19 @@
+import { useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Eye, Trash2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Invoice } from '@/types';
 
 interface InvoiceListProps {
@@ -12,6 +23,15 @@ interface InvoiceListProps {
 }
 
 const InvoiceList = ({ invoices, onViewInvoice, onDeleteInvoice }: InvoiceListProps) => {
+  const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
+
+  const handleConfirmDelete = () => {
+    if (deleteInvoice) {
+      onDeleteInvoice(deleteInvoice.id);
+      setDeleteInvoice(null);
+    }
+  };
+
   if (invoices.length === 0) {
     return (
       <Card className="animate-fade-in">
@@ -26,67 +46,87 @@ const InvoiceList = ({ invoices, onViewInvoice, onDeleteInvoice }: InvoiceListPr
   }
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      <Card>
-        <CardHeader>
-          <CardTitle>Factures ({invoices.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-2 font-medium text-muted-foreground">N°</th>
-                  <th className="text-left py-3 px-2 font-medium text-muted-foreground">Date</th>
-                  <th className="text-left py-3 px-2 font-medium text-muted-foreground">Client</th>
-                  <th className="text-left py-3 px-2 font-medium text-muted-foreground">Type</th>
-                  <th className="text-right py-3 px-2 font-medium text-muted-foreground">Total</th>
-                  <th className="text-right py-3 px-2 font-medium text-muted-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map((invoice) => (
-                  <tr key={invoice.id} className="border-b hover:bg-secondary/50 transition-colors">
-                    <td className="py-3 px-2 font-medium">{invoice.invoiceNumber}</td>
-                    <td className="py-3 px-2">
-                      {format(new Date(invoice.date), 'dd/MM/yyyy', { locale: fr })}
-                    </td>
-                    <td className="py-3 px-2">{invoice.clientName}</td>
-                    <td className="py-3 px-2">
-                      <span className="inline-block px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
-                        {invoice.interventionTypeName}
-                      </span>
-                    </td>
-                    <td className="py-3 px-2 text-right font-medium">
-                      {invoice.totalAmount.toLocaleString('fr-FR')} F
-                    </td>
-                    <td className="py-3 px-2 text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => onViewInvoice(invoice)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => onDeleteInvoice(invoice.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
+    <>
+      <div className="space-y-4 animate-fade-in">
+        <Card>
+          <CardHeader>
+            <CardTitle>Factures ({invoices.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">N°</th>
+                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">Date</th>
+                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">Client</th>
+                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">Type</th>
+                    <th className="text-right py-3 px-2 font-medium text-muted-foreground">Total</th>
+                    <th className="text-right py-3 px-2 font-medium text-muted-foreground">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                </thead>
+                <tbody>
+                  {invoices.map((invoice) => (
+                    <tr key={invoice.id} className="border-b hover:bg-secondary/50 transition-colors">
+                      <td className="py-3 px-2 font-medium">{invoice.invoiceNumber}</td>
+                      <td className="py-3 px-2">
+                        {format(new Date(invoice.date), 'dd/MM/yyyy', { locale: fr })}
+                      </td>
+                      <td className="py-3 px-2">{invoice.clientName}</td>
+                      <td className="py-3 px-2">
+                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
+                          {invoice.interventionTypeName}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2 text-right font-medium">
+                        {invoice.totalAmount.toLocaleString('fr-FR')} F
+                      </td>
+                      <td className="py-3 px-2 text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onViewInvoice(invoice)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setDeleteInvoice(invoice)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <AlertDialog open={!!deleteInvoice} onOpenChange={(open) => !open && setDeleteInvoice(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer la facture <strong>{deleteInvoice?.invoiceNumber}</strong> ?
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
