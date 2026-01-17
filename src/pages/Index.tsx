@@ -125,6 +125,7 @@ const Index = () => {
           <InvoiceList
             invoices={invoices}
             clients={clients}
+            editingInvoiceId={editingInvoice?.id}
             onViewInvoice={setSelectedInvoice}
             onEditInvoice={handleEditInvoice}
             onDeleteInvoice={handleDeleteInvoice}
