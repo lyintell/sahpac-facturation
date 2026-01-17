@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Eye, Trash2, FileText, FileCheck, Search, Edit2 } from 'lucide-react';
+import { Eye, Trash2, FileText, FileCheck, Search, Edit2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,9 +25,10 @@ interface InvoiceListProps {
   onEditInvoice: (invoice: Invoice) => void;
   onDeleteInvoice: (id: string) => void;
   onUpdateInvoice: (id: string, data: Partial<Invoice>) => void;
+  onCopyInvoice: (invoice: Invoice) => void;
 }
 
-const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDeleteInvoice, onUpdateInvoice }: InvoiceListProps) => {
+const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDeleteInvoice, onUpdateInvoice, onCopyInvoice }: InvoiceListProps) => {
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
   const [convertInvoice, setConvertInvoice] = useState<Invoice | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -185,6 +186,14 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                             title="Modifier"
                           >
                             <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onCopyInvoice(invoice)}
+                            title="Copier"
+                          >
+                            <Copy className="w-4 h-4" />
                           </Button>
                           <Button
                             size="sm"
