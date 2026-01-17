@@ -20,13 +20,15 @@ const Index = () => {
   ]);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
-  const generateInvoiceNumber = useCallback(() => {
+  const generateInvoiceNumber = useCallback((isProForma: boolean) => {
     const year = new Date().getFullYear();
+    const prefix = isProForma ? 'PF' : 'FAC';
     const count = invoices.filter(inv => {
       const invYear = new Date(inv.date).getFullYear();
-      return invYear === year;
+      const invIsProForma = inv.isProForma !== false;
+      return invYear === year && invIsProForma === isProForma;
     }).length + 1;
-    return `FAC-${year}-${String(count).padStart(4, '0')}`;
+    return `${prefix}-${year}-${String(count).padStart(4, '0')}`;
   }, [invoices]);
 
   const handleAddClient = useCallback((clientData: Omit<Client, 'id' | 'createdAt'>) => {
@@ -58,14 +60,15 @@ const Index = () => {
   }, [setZones]);
 
   const handleCreateInvoice = useCallback((invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => {
+    const isProForma = invoiceData.isProForma !== false;
     const newInvoice: Invoice = {
       ...invoiceData,
       id: Date.now().toString(),
-      invoiceNumber: generateInvoiceNumber(),
+      invoiceNumber: generateInvoiceNumber(isProForma),
       createdAt: new Date(),
     };
     setInvoices(prev => [newInvoice, ...prev]);
-    toast.success(`Facture ${newInvoice.invoiceNumber} créée avec succès`);
+    toast.success(`${isProForma ? 'Pro Forma' : 'Facture'} ${newInvoice.invoiceNumber} créée avec succès`);
     setActiveTab('invoices');
     setSelectedInvoice(newInvoice);
   }, [generateInvoiceNumber, setInvoices]);
@@ -76,9 +79,17 @@ const Index = () => {
   }, [setInvoices]);
 
   const handleUpdateInvoice = useCallback((id: string, data: Partial<Invoice>) => {
-    setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...data } : inv));
+    setInvoices(prev => prev.map(inv => {
+      if (inv.id !== id) return inv;
+      // If converting from proforma to definitive, generate new number
+      if (data.isProForma === false && inv.isProForma !== false) {
+        const newNumber = generateInvoiceNumber(false);
+        return { ...inv, ...data, invoiceNumber: newNumber };
+      }
+      return { ...inv, ...data };
+    }));
     toast.success('Facture mise à jour');
-  }, [setInvoices]);
+  }, [setInvoices, generateInvoiceNumber]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -88,6 +99,7 @@ const Index = () => {
         {activeTab === 'invoices' && (
           <InvoiceList
             invoices={invoices}
+            clients={clients}
             onViewInvoice={setSelectedInvoice}
             onDeleteInvoice={handleDeleteInvoice}
             onUpdateInvoice={handleUpdateInvoice}
