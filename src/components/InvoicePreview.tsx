@@ -110,7 +110,9 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           </div>
 
           {/* Title */}
-          <h2 className="text-center text-xl font-bold underline mb-6 text-primary">FACTURE PROFORMA</h2>
+          <h2 className="text-center text-xl font-bold underline mb-6 text-primary">
+            {invoice.isProForma !== false ? 'FACTURE PROFORMA' : 'FACTURE'}
+          </h2>
           
           {/* Invoice Number */}
           <p className="text-right text-sm text-muted-foreground mb-4">N° {invoice.invoiceNumber}</p>
