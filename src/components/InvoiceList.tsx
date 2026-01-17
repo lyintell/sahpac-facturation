@@ -21,7 +21,6 @@ import { Invoice } from '@/types';
 interface InvoiceListProps {
   invoices: Invoice[];
   clients: { id: string; phone?: string }[];
-  editingInvoiceId?: string | null;
   onViewInvoice: (invoice: Invoice) => void;
   onEditInvoice: (invoice: Invoice) => void;
   onDeleteInvoice: (id: string) => void;
@@ -29,7 +28,7 @@ interface InvoiceListProps {
   onCopyInvoice: (invoice: Invoice) => void;
 }
 
-const InvoiceList = ({ invoices, clients, editingInvoiceId, onViewInvoice, onEditInvoice, onDeleteInvoice, onUpdateInvoice, onCopyInvoice }: InvoiceListProps) => {
+const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDeleteInvoice, onUpdateInvoice, onCopyInvoice }: InvoiceListProps) => {
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
   const [convertInvoice, setConvertInvoice] = useState<Invoice | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -149,14 +148,7 @@ const InvoiceList = ({ invoices, clients, editingInvoiceId, onViewInvoice, onEdi
                 </thead>
                 <tbody>
                   {filteredInvoices.map((invoice) => (
-                    <tr 
-                      key={invoice.id} 
-                      className={`border-b transition-colors ${
-                        editingInvoiceId === invoice.id 
-                          ? 'bg-primary/20 hover:bg-primary/25' 
-                          : 'hover:bg-secondary/50'
-                      }`}
-                    >
+                    <tr key={invoice.id} className="border-b hover:bg-secondary/50 transition-colors">
                       <td className="py-3 px-2 font-medium">{invoice.invoiceNumber}</td>
                       <td className="py-3 px-2">
                         <Badge variant={invoice.isProForma !== false ? 'secondary' : 'default'}>
