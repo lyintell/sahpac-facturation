@@ -89,6 +89,20 @@ const Index = () => {
     toast.success('Facture supprimée');
   }, [setInvoices]);
 
+  const handleCopyInvoice = useCallback((invoice: Invoice) => {
+    const isProForma = invoice.isProForma !== false;
+    const newInvoice: Invoice = {
+      ...invoice,
+      id: Date.now().toString(),
+      invoiceNumber: generateInvoiceNumber(isProForma),
+      date: new Date(),
+      createdAt: new Date(),
+    };
+    setInvoices(prev => [newInvoice, ...prev]);
+    toast.success(`Copie ${newInvoice.invoiceNumber} créée`);
+    setSelectedInvoice(newInvoice);
+  }, [generateInvoiceNumber, setInvoices]);
+
   const handleUpdateInvoice = useCallback((id: string, data: Partial<Invoice>) => {
     setInvoices(prev => prev.map(inv => {
       if (inv.id !== id) return inv;
@@ -115,6 +129,7 @@ const Index = () => {
             onEditInvoice={handleEditInvoice}
             onDeleteInvoice={handleDeleteInvoice}
             onUpdateInvoice={handleUpdateInvoice}
+            onCopyInvoice={handleCopyInvoice}
           />
         )}
         

@@ -31,6 +31,7 @@ export interface Invoice {
   zones: ZoneIntervention[];
   frequency: string;
   findings: string;
+  observations?: string;
   amountHT: number;
   tvaRate: number;
   tvaAmount: number;

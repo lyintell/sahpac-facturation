@@ -41,6 +41,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, onAddClient, onAddZone, o
   const [tvaRate] = useState(DEFAULT_TVA_RATE);
   const [includeTva, setIncludeTva] = useState(true);
   const [isProForma, setIsProForma] = useState(true);
+  const [observations, setObservations] = useState('');
 
   // Load editing invoice data
   useEffect(() => {
@@ -55,6 +56,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, onAddClient, onAddZone, o
       setAmountHT(editingInvoice.amountHT.toString());
       setIncludeTva(editingInvoice.tvaRate > 0);
       setIsProForma(editingInvoice.isProForma !== false);
+      setObservations(editingInvoice.observations || '');
     }
   }, [editingInvoice]);
 
@@ -69,6 +71,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, onAddClient, onAddZone, o
     setAmountHT('');
     setIsProForma(true);
     setIncludeTva(true);
+    setObservations('');
   };
 
   const selectedIntervention = INTERVENTION_TYPES.find(t => t.id === selectedInterventionId);
@@ -133,6 +136,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, onAddClient, onAddZone, o
       zones: selectedZones,
       frequency,
       findings,
+      observations,
       amountHT: parseFloat(amountHT) || 0,
       tvaRate: includeTva ? tvaRate : 0,
       tvaAmount,
@@ -425,6 +429,16 @@ const InvoiceForm = ({ clients, zones, editingInvoice, onAddClient, onAddZone, o
                 className="bg-primary/10 font-bold"
               />
             </div>
+          </div>
+
+          <div className="space-y-2 pt-4 border-t">
+            <Label>Observations</Label>
+            <Textarea
+              placeholder="Observations supplémentaires..."
+              value={observations}
+              onChange={(e) => setObservations(e.target.value)}
+              rows={3}
+            />
           </div>
         </CardContent>
       </Card>
