@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Plus, X, FileText } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Plus, X, FileText, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,12 +12,15 @@ import { Client, Invoice, ZoneIntervention, INTERVENTION_TYPES, DEFAULT_TVA_RATE
 interface InvoiceFormProps {
   clients: Client[];
   zones: ZoneIntervention[];
+  editingInvoice?: Invoice | null;
   onAddClient: (client: Omit<Client, 'id' | 'createdAt'>) => void;
   onAddZone: (zone: Omit<ZoneIntervention, 'id'>) => void;
   onCreateInvoice: (invoice: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => void;
+  onUpdateInvoice?: (id: string, data: Partial<Invoice>) => void;
+  onCancelEdit?: () => void;
 }
 
-const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }: InvoiceFormProps) => {
+const InvoiceForm = ({ clients, zones, editingInvoice, onAddClient, onAddZone, onCreateInvoice, onUpdateInvoice, onCancelEdit }: InvoiceFormProps) => {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [newClientName, setNewClientName] = useState('');
   const [newClientAddress, setNewClientAddress] = useState('');
@@ -38,6 +41,35 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
   const [tvaRate] = useState(DEFAULT_TVA_RATE);
   const [includeTva, setIncludeTva] = useState(true);
   const [isProForma, setIsProForma] = useState(true);
+
+  // Load editing invoice data
+  useEffect(() => {
+    if (editingInvoice) {
+      setSelectedClientId(editingInvoice.clientId);
+      setWorkDescription(editingInvoice.workDescription);
+      setSelectedInterventionId(editingInvoice.interventionTypeId);
+      setCustomInterventionDesc(editingInvoice.interventionDescription);
+      setSelectedZones(editingInvoice.zones);
+      setFrequency(editingInvoice.frequency);
+      setFindings(editingInvoice.findings);
+      setAmountHT(editingInvoice.amountHT.toString());
+      setIncludeTva(editingInvoice.tvaRate > 0);
+      setIsProForma(editingInvoice.isProForma !== false);
+    }
+  }, [editingInvoice]);
+
+  const resetForm = () => {
+    setSelectedClientId('');
+    setWorkDescription('');
+    setSelectedInterventionId('');
+    setCustomInterventionDesc('');
+    setSelectedZones([]);
+    setFrequency('');
+    setFindings('');
+    setAmountHT('');
+    setIsProForma(true);
+    setIncludeTva(true);
+  };
 
   const selectedIntervention = INTERVENTION_TYPES.find(t => t.id === selectedInterventionId);
   
@@ -90,8 +122,8 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
     const client = clients.find(c => c.id === selectedClientId);
     if (!client || !selectedIntervention) return;
 
-    const invoice: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'> = {
-      date: new Date(),
+    const invoiceData = {
+      date: editingInvoice ? new Date(editingInvoice.date) : new Date(),
       clientId: client.id,
       clientName: client.name,
       workDescription,
@@ -108,23 +140,44 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
       isProForma,
     };
 
-    onCreateInvoice(invoice);
+    if (editingInvoice && onUpdateInvoice) {
+      onUpdateInvoice(editingInvoice.id, invoiceData);
+      onCancelEdit?.();
+    } else {
+      onCreateInvoice(invoiceData);
+    }
     
-    // Reset form
-    setSelectedClientId('');
-    setWorkDescription('');
-    setSelectedInterventionId('');
-    setCustomInterventionDesc('');
-    setSelectedZones([]);
-    setFrequency('');
-    setFindings('');
-    setAmountHT('');
+    resetForm();
+  };
+
+  const handleCancel = () => {
+    resetForm();
+    onCancelEdit?.();
   };
 
   const isValid = selectedClientId && selectedInterventionId && workDescription && parseFloat(amountHT) > 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {editingInvoice && (
+        <Card className="border-primary/50 bg-primary/5">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Mode édition</p>
+                <p className="text-sm text-muted-foreground">
+                  Modification de la facture {editingInvoice.invoiceNumber}
+                </p>
+              </div>
+              <Button variant="outline" onClick={handleCancel}>
+                <X className="w-4 h-4 mr-2" />
+                Annuler
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Client Selection */}
       <Card>
         <CardHeader>
@@ -382,8 +435,17 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
         className="w-full"
         size="lg"
       >
-        <FileText className="w-5 h-5 mr-2" />
-        Créer la Facture
+        {editingInvoice ? (
+          <>
+            <Save className="w-5 h-5 mr-2" />
+            Enregistrer les modifications
+          </>
+        ) : (
+          <>
+            <FileText className="w-5 h-5 mr-2" />
+            Créer la Facture
+          </>
+        )}
       </Button>
     </div>
   );

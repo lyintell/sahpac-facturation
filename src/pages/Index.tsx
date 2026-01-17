@@ -19,6 +19,16 @@ const Index = () => {
     { id: '4', name: 'La cour' },
   ]);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+
+  const handleEditInvoice = useCallback((invoice: Invoice) => {
+    setEditingInvoice(invoice);
+    setActiveTab('new');
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingInvoice(null);
+  }, []);
 
   const generateInvoiceNumber = useCallback((isProForma: boolean) => {
     const year = new Date().getFullYear();
@@ -101,6 +111,7 @@ const Index = () => {
             invoices={invoices}
             clients={clients}
             onViewInvoice={setSelectedInvoice}
+            onEditInvoice={handleEditInvoice}
             onDeleteInvoice={handleDeleteInvoice}
             onUpdateInvoice={handleUpdateInvoice}
           />
@@ -119,9 +130,12 @@ const Index = () => {
           <InvoiceForm
             clients={clients}
             zones={zones}
+            editingInvoice={editingInvoice}
             onAddClient={handleAddClient}
             onAddZone={handleAddZone}
             onCreateInvoice={handleCreateInvoice}
+            onUpdateInvoice={handleUpdateInvoice}
+            onCancelEdit={handleCancelEdit}
           />
         )}
       </main>
