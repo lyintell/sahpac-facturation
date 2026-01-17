@@ -31,19 +31,37 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
   const [convertInvoice, setConvertInvoice] = useState<Invoice | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'proforma' | 'definitive'>('all');
 
   const filteredInvoices = useMemo(() => {
-    if (!searchQuery.trim()) return invoices;
-    const query = searchQuery.toLowerCase();
-    return invoices.filter(invoice => {
-      const client = clients.find(c => c.id === invoice.clientId);
-      return invoice.clientName.toLowerCase().includes(query) ||
-        (client?.phone && client.phone.toLowerCase().includes(query));
-    });
-  }, [invoices, clients, searchQuery]);
+    let filtered = invoices;
+    
+    // Filter by type
+    if (typeFilter === 'proforma') {
+      filtered = filtered.filter(inv => inv.isProForma !== false);
+    } else if (typeFilter === 'definitive') {
+      filtered = filtered.filter(inv => inv.isProForma === false);
+    }
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(invoice => {
+        const client = clients.find(c => c.id === invoice.clientId);
+        return invoice.clientName.toLowerCase().includes(query) ||
+          (client?.phone && client.phone.toLowerCase().includes(query));
+      });
+    }
+    
+    return filtered;
+  }, [invoices, clients, searchQuery, typeFilter]);
 
   const proFormaCount = useMemo(() => invoices.filter(inv => inv.isProForma !== false).length, [invoices]);
   const definitiveCount = useMemo(() => invoices.filter(inv => inv.isProForma === false).length, [invoices]);
+
+  const toggleTypeFilter = (type: 'proforma' | 'definitive') => {
+    setTypeFilter(prev => prev === type ? 'all' : type);
+  };
 
   const handleConfirmDelete = () => {
     if (deleteInvoice) {
@@ -80,8 +98,20 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <CardTitle>Factures ({invoices.length})</CardTitle>
               <div className="flex gap-2">
-                <Badge variant="secondary">{proFormaCount} Pro Forma</Badge>
-                <Badge variant="default">{definitiveCount} Définitives</Badge>
+                <Badge 
+                  variant={typeFilter === 'proforma' ? 'default' : 'secondary'} 
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => toggleTypeFilter('proforma')}
+                >
+                  {proFormaCount} Pro Forma
+                </Badge>
+                <Badge 
+                  variant={typeFilter === 'definitive' ? 'default' : 'outline'} 
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => toggleTypeFilter('definitive')}
+                >
+                  {definitiveCount} Définitives
+                </Badge>
               </div>
             </div>
           </CardHeader>
