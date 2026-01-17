@@ -28,6 +28,7 @@ const Index = () => {
 
   const handleCancelEdit = useCallback(() => {
     setEditingInvoice(null);
+    setActiveTab('invoices');
   }, []);
 
   const generateInvoiceNumber = useCallback((isProForma: boolean) => {
