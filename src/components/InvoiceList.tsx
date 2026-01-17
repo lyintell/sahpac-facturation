@@ -101,14 +101,14 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
               <div className="flex gap-2">
                 <Badge 
                   variant={typeFilter === 'proforma' ? 'default' : 'secondary'} 
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  className={`cursor-pointer hover:opacity-80 transition-opacity ${typeFilter === 'proforma' ? 'bg-gray-700 hover:bg-gray-700' : ''}`}
                   onClick={() => toggleTypeFilter('proforma')}
                 >
                   {proFormaCount} Pro Forma
                 </Badge>
                 <Badge 
-                  variant={typeFilter === 'definitive' ? 'default' : 'outline'} 
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  variant={typeFilter === 'definitive' ? 'default' : 'secondary'} 
+                  className={`cursor-pointer hover:opacity-80 transition-opacity ${typeFilter === 'definitive' ? 'bg-gray-700 hover:bg-gray-700' : 'bg-blue-100 text-blue-700 hover:bg-blue-100'}`}
                   onClick={() => toggleTypeFilter('definitive')}
                 >
                   {definitiveCount} Définitives
