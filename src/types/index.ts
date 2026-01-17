@@ -35,6 +35,7 @@ export interface Invoice {
   tvaRate: number;
   tvaAmount: number;
   totalAmount: number;
+  isProForma: boolean;
   createdAt: Date;
 }
 

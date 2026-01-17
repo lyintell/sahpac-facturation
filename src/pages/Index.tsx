@@ -75,6 +75,11 @@ const Index = () => {
     toast.success('Facture supprimée');
   }, [setInvoices]);
 
+  const handleUpdateInvoice = useCallback((id: string, data: Partial<Invoice>) => {
+    setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...data } : inv));
+    toast.success('Facture mise à jour');
+  }, [setInvoices]);
+
   return (
     <div className="min-h-screen bg-background">
       <Header activeTab={activeTab} onTabChange={setActiveTab} />
@@ -85,6 +90,7 @@ const Index = () => {
             invoices={invoices}
             onViewInvoice={setSelectedInvoice}
             onDeleteInvoice={handleDeleteInvoice}
+            onUpdateInvoice={handleUpdateInvoice}
           />
         )}
         

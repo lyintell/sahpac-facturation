@@ -37,6 +37,7 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
   const [amountHT, setAmountHT] = useState('');
   const [tvaRate] = useState(DEFAULT_TVA_RATE);
   const [includeTva, setIncludeTva] = useState(true);
+  const [isProForma, setIsProForma] = useState(true);
 
   const selectedIntervention = INTERVENTION_TYPES.find(t => t.id === selectedInterventionId);
   
@@ -104,6 +105,7 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
       tvaRate: includeTva ? tvaRate : 0,
       tvaAmount,
       totalAmount,
+      isProForma,
     };
 
     onCreateInvoice(invoice);
@@ -315,15 +317,27 @@ const InvoiceForm = ({ clients, zones, onAddClient, onAddZone, onCreateInvoice }
           <CardTitle>Montants</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center space-x-3 pb-2 border-b">
-            <Switch
-              id="include-tva"
-              checked={includeTva}
-              onCheckedChange={setIncludeTva}
-            />
-            <Label htmlFor="include-tva" className="cursor-pointer">
-              Appliquer la TVA ({tvaRate}%)
-            </Label>
+          <div className="flex flex-col md:flex-row md:items-center gap-4 pb-2 border-b">
+            <div className="flex items-center space-x-3">
+              <Switch
+                id="is-proforma"
+                checked={isProForma}
+                onCheckedChange={setIsProForma}
+              />
+              <Label htmlFor="is-proforma" className="cursor-pointer">
+                Facture Pro Forma
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Switch
+                id="include-tva"
+                checked={includeTva}
+                onCheckedChange={setIncludeTva}
+              />
+              <Label htmlFor="include-tva" className="cursor-pointer">
+                Appliquer la TVA ({tvaRate}%)
+              </Label>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
