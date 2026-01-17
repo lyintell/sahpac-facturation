@@ -42,6 +42,9 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
     });
   }, [invoices, clients, searchQuery]);
 
+  const proFormaCount = useMemo(() => invoices.filter(inv => inv.isProForma !== false).length, [invoices]);
+  const definitiveCount = useMemo(() => invoices.filter(inv => inv.isProForma === false).length, [invoices]);
+
   const handleConfirmDelete = () => {
     if (deleteInvoice) {
       onDeleteInvoice(deleteInvoice.id);
@@ -74,7 +77,13 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
       <div className="space-y-4 animate-fade-in">
         <Card>
           <CardHeader>
-            <CardTitle>Factures ({invoices.length})</CardTitle>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <CardTitle>Factures ({invoices.length})</CardTitle>
+              <div className="flex gap-2">
+                <Badge variant="secondary">{proFormaCount} Pro Forma</Badge>
+                <Badge variant="default">{definitiveCount} Définitives</Badge>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="relative">
