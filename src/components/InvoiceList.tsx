@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Eye, Trash2, FileText, FileCheck } from 'lucide-react';
+import { Eye, Trash2, FileText, FileCheck, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -19,14 +20,26 @@ import { Invoice } from '@/types';
 
 interface InvoiceListProps {
   invoices: Invoice[];
+  clients: { id: string; phone?: string }[];
   onViewInvoice: (invoice: Invoice) => void;
   onDeleteInvoice: (id: string) => void;
   onUpdateInvoice: (id: string, data: Partial<Invoice>) => void;
 }
 
-const InvoiceList = ({ invoices, onViewInvoice, onDeleteInvoice, onUpdateInvoice }: InvoiceListProps) => {
+const InvoiceList = ({ invoices, clients, onViewInvoice, onDeleteInvoice, onUpdateInvoice }: InvoiceListProps) => {
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
   const [convertInvoice, setConvertInvoice] = useState<Invoice | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredInvoices = useMemo(() => {
+    if (!searchQuery.trim()) return invoices;
+    const query = searchQuery.toLowerCase();
+    return invoices.filter(invoice => {
+      const client = clients.find(c => c.id === invoice.clientId);
+      return invoice.clientName.toLowerCase().includes(query) ||
+        (client?.phone && client.phone.toLowerCase().includes(query));
+    });
+  }, [invoices, clients, searchQuery]);
 
   const handleConfirmDelete = () => {
     if (deleteInvoice) {
@@ -62,7 +75,23 @@ const InvoiceList = ({ invoices, onViewInvoice, onDeleteInvoice, onUpdateInvoice
           <CardHeader>
             <CardTitle>Factures ({invoices.length})</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher par nom de client ou téléphone..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            {filteredInvoices.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                {invoices.length === 0 
+                  ? "Aucune facture enregistrée. Créez votre première facture."
+                  : "Aucune facture trouvée pour cette recherche."}
+              </p>
+            ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -77,7 +106,7 @@ const InvoiceList = ({ invoices, onViewInvoice, onDeleteInvoice, onUpdateInvoice
                   </tr>
                 </thead>
                 <tbody>
-                  {invoices.map((invoice) => (
+                  {filteredInvoices.map((invoice) => (
                     <tr key={invoice.id} className="border-b hover:bg-secondary/50 transition-colors">
                       <td className="py-3 px-2 font-medium">{invoice.invoiceNumber}</td>
                       <td className="py-3 px-2">
@@ -131,6 +160,7 @@ const InvoiceList = ({ invoices, onViewInvoice, onDeleteInvoice, onUpdateInvoice
                 </tbody>
               </table>
             </div>
+            )}
           </CardContent>
         </Card>
       </div>

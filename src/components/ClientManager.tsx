@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Trash2, Edit2, Save, X } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Plus, Trash2, Edit2, Save, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,6 +31,16 @@ const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }:
   const [editAddress, setEditAddress] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [deleteClient, setDeleteClient] = useState<Client | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredClients = useMemo(() => {
+    if (!searchQuery.trim()) return clients;
+    const query = searchQuery.toLowerCase();
+    return clients.filter(client => 
+      client.name.toLowerCase().includes(query) ||
+      (client.phone && client.phone.toLowerCase().includes(query))
+    );
+  }, [clients, searchQuery]);
 
   const handleAddClient = () => {
     if (newClientName.trim()) {
@@ -116,14 +126,25 @@ const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }:
           <CardHeader>
             <CardTitle>Liste des Clients ({clients.length})</CardTitle>
           </CardHeader>
-          <CardContent>
-            {clients.length === 0 ? (
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher par nom ou téléphone..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            {filteredClients.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                Aucun client enregistré. Ajoutez votre premier client ci-dessus.
+                {clients.length === 0 
+                  ? "Aucun client enregistré. Ajoutez votre premier client ci-dessus."
+                  : "Aucun client trouvé pour cette recherche."}
               </p>
             ) : (
               <div className="space-y-2">
-                {clients.map((client) => (
+                {filteredClients.map((client) => (
                   <div
                     key={client.id}
                     className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors"
