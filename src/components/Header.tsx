@@ -39,7 +39,7 @@ const Header = ({ activeTab, onTabChange }: HeaderProps) => {
               Clients
             </Button>
             <Button
-              variant={activeTab === 'new' ? 'secondary' : 'ghost'}
+              variant="ghost"
               onClick={() => onTabChange('new')}
               className="flex items-center gap-2"
             >
