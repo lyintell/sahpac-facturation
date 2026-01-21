@@ -1,8 +1,8 @@
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { Printer, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Invoice } from '@/types';
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Printer, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Invoice } from "@/types";
 
 interface InvoicePreviewProps {
   invoice: Invoice;
@@ -10,64 +10,95 @@ interface InvoicePreviewProps {
 }
 
 const numberToWords = (num: number): string => {
-  const ones = ['', 'UN', 'DEUX', 'TROIS', 'QUATRE', 'CINQ', 'SIX', 'SEPT', 'HUIT', 'NEUF', 'DIX', 
-                'ONZE', 'DOUZE', 'TREIZE', 'QUATORZE', 'QUINZE', 'SEIZE', 'DIX-SEPT', 'DIX-HUIT', 'DIX-NEUF'];
-  const tens = ['', '', 'VINGT', 'TRENTE', 'QUARANTE', 'CINQUANTE', 'SOIXANTE', 'SOIXANTE', 'QUATRE-VINGT', 'QUATRE-VINGT'];
-  
-  if (num === 0) return 'ZÉRO';
-  if (num < 0) return 'MOINS ' + numberToWords(-num);
-  
-  let words = '';
-  
+  const ones = [
+    "",
+    "UN",
+    "DEUX",
+    "TROIS",
+    "QUATRE",
+    "CINQ",
+    "SIX",
+    "SEPT",
+    "HUIT",
+    "NEUF",
+    "DIX",
+    "ONZE",
+    "DOUZE",
+    "TREIZE",
+    "QUATORZE",
+    "QUINZE",
+    "SEIZE",
+    "DIX-SEPT",
+    "DIX-HUIT",
+    "DIX-NEUF",
+  ];
+  const tens = [
+    "",
+    "",
+    "VINGT",
+    "TRENTE",
+    "QUARANTE",
+    "CINQUANTE",
+    "SOIXANTE",
+    "SOIXANTE",
+    "QUATRE-VINGT",
+    "QUATRE-VINGT",
+  ];
+
+  if (num === 0) return "ZÉRO";
+  if (num < 0) return "MOINS " + numberToWords(-num);
+
+  let words = "";
+
   if (Math.floor(num / 1000000) > 0) {
-    words += numberToWords(Math.floor(num / 1000000)) + ' MILLION ';
+    words += numberToWords(Math.floor(num / 1000000)) + " MILLION ";
     num %= 1000000;
   }
-  
+
   if (Math.floor(num / 1000) > 0) {
     if (Math.floor(num / 1000) === 1) {
-      words += 'MILLE ';
+      words += "MILLE ";
     } else {
-      words += numberToWords(Math.floor(num / 1000)) + ' MILLE ';
+      words += numberToWords(Math.floor(num / 1000)) + " MILLE ";
     }
     num %= 1000;
   }
-  
+
   if (Math.floor(num / 100) > 0) {
     if (Math.floor(num / 100) === 1) {
-      words += 'CENT ';
+      words += "CENT ";
     } else {
-      words += ones[Math.floor(num / 100)] + ' CENT ';
+      words += ones[Math.floor(num / 100)] + " CENT ";
     }
     num %= 100;
   }
-  
+
   if (num > 0) {
     if (num < 20) {
       words += ones[num];
     } else {
       const tenIndex = Math.floor(num / 10);
       const oneIndex = num % 10;
-      
+
       if (tenIndex === 7 || tenIndex === 9) {
-        words += tens[tenIndex] + '-' + ones[10 + oneIndex];
+        words += tens[tenIndex] + "-" + ones[10 + oneIndex];
       } else if (tenIndex === 8) {
         if (oneIndex === 0) {
-          words += 'QUATRE-VINGTS';
+          words += "QUATRE-VINGTS";
         } else {
-          words += 'QUATRE-VINGT-' + ones[oneIndex];
+          words += "QUATRE-VINGT-" + ones[oneIndex];
         }
       } else {
         words += tens[tenIndex];
         if (oneIndex === 1 && tenIndex !== 8) {
-          words += ' ET UN';
+          words += " ET UN";
         } else if (oneIndex > 0) {
-          words += '-' + ones[oneIndex];
+          words += "-" + ones[oneIndex];
         }
       }
     }
   }
-  
+
   return words.trim();
 };
 
@@ -80,7 +111,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
   const totalInWords = numberToWords(Math.round(invoice.totalAmount));
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-foreground/50 flex items-center justify-center p-4 z-50 overflow-auto"
       onClick={onClose}
     >
@@ -98,10 +129,10 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
 
         <div className="invoice-paper bg-card">
           {/* Header with letterhead image */}
-          <div className="invoice-header mb-2 border-b-0 pb-0">
-            <img 
-              src="/sahpac-header.png" 
-              alt="SAHPAC SARL - Société Africaine pour l'Hygiène Publique, L'Agriculture & le Commerce" 
+          <div className="invoice-header border-b-0 pb-0">
+            <img
+              src="/sahpac-header.png"
+              alt="SAHPAC SARL - Société Africaine pour l'Hygiène Publique, L'Agriculture & le Commerce"
               className="w-full object-contain"
             />
             <p className="text-sm text-muted-foreground text-center mt-1">Bamako, le {formattedDate}</p>
@@ -109,9 +140,9 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
 
           {/* Title */}
           <h2 className="text-center text-xl font-bold underline mb-6 text-primary">
-            {invoice.isProForma !== false ? 'FACTURE PROFORMA' : 'FACTURE'}
+            {invoice.isProForma !== false ? "FACTURE PROFORMA" : "FACTURE"}
           </h2>
-          
+
           {/* Invoice Number */}
           <p className="text-right text-sm text-muted-foreground mb-4">N° {invoice.invoiceNumber}</p>
 
@@ -127,7 +158,8 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           <div className="mb-6">
             <h3 className="invoice-section-title">TYPE D'INTERVENTION</h3>
             <p className="mb-2">
-              <span className="font-semibold text-primary">{invoice.interventionTypeName.toUpperCase()}</span> : {invoice.interventionDescription}
+              <span className="font-semibold text-primary">{invoice.interventionTypeName.toUpperCase()}</span> :{" "}
+              {invoice.interventionDescription}
             </p>
           </div>
 
@@ -136,7 +168,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
             <div className="mb-6">
               <h3 className="invoice-section-title">ZONES D'INTERVENTION</h3>
               <ul className="list-disc list-inside space-y-1">
-                {invoice.zones.map(zone => (
+                {invoice.zones.map((zone) => (
                   <li key={zone.id}>{zone.name}</li>
                 ))}
               </ul>
@@ -175,17 +207,17 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
               <div className="w-64 space-y-2">
                 <div className="flex justify-between">
                   <span>Soit au forfait</span>
-                  <span className="font-medium">{invoice.amountHT.toLocaleString('fr-FR')} F</span>
+                  <span className="font-medium">{invoice.amountHT.toLocaleString("fr-FR")} F</span>
                 </div>
                 {invoice.tvaRate > 0 && (
                   <div className="flex justify-between">
                     <span>TVA {invoice.tvaRate}%</span>
-                    <span className="font-medium">{invoice.tvaAmount.toLocaleString('fr-FR')} F</span>
+                    <span className="font-medium">{invoice.tvaAmount.toLocaleString("fr-FR")} F</span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
-                  <span>Total{invoice.tvaRate > 0 ? ' TTC' : ''}</span>
-                  <span>{invoice.totalAmount.toLocaleString('fr-FR')} F</span>
+                  <span>Total{invoice.tvaRate > 0 ? " TTC" : ""}</span>
+                  <span>{invoice.totalAmount.toLocaleString("fr-FR")} F</span>
                 </div>
               </div>
             </div>
@@ -210,7 +242,10 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           {/* Footer */}
           <div className="mt-12 pt-4 border-t border-foreground text-center text-xs">
             <p className="font-semibold">Siège social : Faladié SEMA (cité BIAO) porte 250 Rue 902</p>
-            <p>Compte BMS : 000163802001 - RCCM : MABKO 2007 3558 N° Fiscal 086103191<sup>E</sup> - Tél 66.94.30.18 & 76.49.53.67</p>
+            <p>
+              Compte BMS : 000163802001 - RCCM : MABKO 2007 3558 N° Fiscal 086103191<sup>E</sup> - Tél 66.94.30.18 &
+              76.49.53.67
+            </p>
             <p>sahpac1_sarl@yahoo.fr : Bamako - Mali</p>
           </div>
         </div>
