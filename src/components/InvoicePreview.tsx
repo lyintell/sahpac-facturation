@@ -98,13 +98,13 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
 
         <div className="invoice-paper bg-card">
           {/* Header with letterhead image */}
-          <div className="invoice-header mb-6 border-b-0 pb-2">
+          <div className="invoice-header mb-3 border-b-0 pb-0">
             <img 
               src="/sahpac-header.png" 
               alt="SAHPAC SARL - Société Africaine pour l'Hygiène Publique, L'Agriculture & le Commerce" 
               className="w-full object-contain"
             />
-            <p className="text-sm text-muted-foreground text-center mt-4">Bamako, le {formattedDate}</p>
+            <p className="text-sm text-muted-foreground text-center mt-2">Bamako, le {formattedDate}</p>
           </div>
 
           {/* Title */}
