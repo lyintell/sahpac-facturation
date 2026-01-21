@@ -13,7 +13,7 @@ const Header = ({ activeTab, onTabChange }: HeaderProps) => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center p-1">
               <img src={sahpacLogo} alt="SAHPAC Logo" className="w-full h-full object-contain" />
             </div>
             <div>
