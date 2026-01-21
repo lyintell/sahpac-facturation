@@ -94,19 +94,14 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
         </div>
 
         <div className="invoice-paper bg-card">
-          {/* Header */}
-          <div className="invoice-header text-center">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center">
-                <span className="font-display font-bold text-accent-foreground text-2xl">S</span>
-              </div>
-              <div>
-                <h1 className="font-display text-3xl font-bold text-primary">SAHPAC <span className="text-lg font-normal">SARL</span></h1>
-                <p className="text-sm text-muted-foreground">Société Africaine pour l'Hygiène Publique</p>
-                <p className="text-sm text-muted-foreground">L'Agriculture & le Commerce</p>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground">Bamako, le {formattedDate}</p>
+          {/* Header with letterhead image */}
+          <div className="invoice-header mb-6 border-b-0 pb-2">
+            <img 
+              src="/sahpac-header.png" 
+              alt="SAHPAC SARL - Société Africaine pour l'Hygiène Publique, L'Agriculture & le Commerce" 
+              className="w-full max-h-28 object-contain"
+            />
+            <p className="text-sm text-muted-foreground text-center mt-4">Bamako, le {formattedDate}</p>
           </div>
 
           {/* Title */}
@@ -201,9 +196,10 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           </div>
 
           {/* Footer */}
-          <div className="mt-12 pt-4 border-t text-center text-xs text-muted-foreground">
-            <p>Compte BMS : 1638020115 - RCCM : MARKO 2007 3858 - N° Fiscal 0861031915</p>
-            <p>Tél 66.94.30.18 - Bamako, Mali</p>
+          <div className="mt-12 pt-4 border-t border-foreground text-center text-xs">
+            <p className="font-semibold">Siège social : Faladié SEMA (cité BIAO) porte 250 Rue 902</p>
+            <p>Compte BMS : 000163802001 - RCCM : MABKO 2007 3558 N° Fiscal 086103191<sup>E</sup> - Tél 66.94.30.18 & 76.49.53.67</p>
+            <p>sahpac1_sarl@yahoo.fr : Bamako - Mali</p>
           </div>
         </div>
       </div>
