@@ -148,7 +148,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
 
           {/* Client */}
           <p className="mb-4">
-            <span className="font-semibold">Doit : {invoice.clientName}</span>
+            <span className="font-semibold underline">Doit : {invoice.clientName}</span>
           </p>
 
           {/* Work Description */}
@@ -158,8 +158,8 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           <div className="mb-6">
             <h3 className="invoice-section-title">TYPE D'INTERVENTION</h3>
             <p className="mb-2">
-              <span className="font-semibold text-primary">{invoice.interventionTypeName.toUpperCase()}</span> :{" "}
-              {invoice.interventionDescription}
+              <span className="font-semibold text-primary underline">{invoice.interventionTypeName.toUpperCase()}</span>{" "}
+              : {invoice.interventionDescription}
             </p>
           </div>
 
@@ -187,7 +187,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           {invoice.findings && (
             <div className="mb-6">
               <p>
-                <span className="font-semibold text-primary">CONSTAT</span> : {invoice.findings}
+                <span className="font-semibold text-primary underline">CONSTAT</span> : {invoice.findings}
               </p>
             </div>
           )}
