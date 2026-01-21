@@ -1,9 +1,13 @@
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Edit2, Save, X, Search, FileText, FilePlus } from 'lucide-react';
+import { format } from 'date-fns';
+import { Plus, Trash2, Edit2, Save, X, Search, FileText, FilePlus, CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +48,8 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClientForInvoices, setSelectedClientForInvoices] = useState<Client | null>(null);
   const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<'all' | 'proforma' | 'definitive'>('all');
+  const [clientDateFrom, setClientDateFrom] = useState<Date | undefined>(undefined);
+  const [clientDateTo, setClientDateTo] = useState<Date | undefined>(undefined);
 
   const clientInvoices = useMemo(() => {
     if (!selectedClientForInvoices) return [];
@@ -55,8 +61,23 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
       filtered = filtered.filter(inv => inv.isProForma === false);
     }
     
+    // Filter by date range
+    if (clientDateFrom) {
+      filtered = filtered.filter(inv => new Date(inv.date) >= clientDateFrom);
+    }
+    if (clientDateTo) {
+      const endOfDay = new Date(clientDateTo);
+      endOfDay.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(inv => new Date(inv.date) <= endOfDay);
+    }
+    
     return filtered;
-  }, [invoices, selectedClientForInvoices, invoiceTypeFilter]);
+  }, [invoices, selectedClientForInvoices, invoiceTypeFilter, clientDateFrom, clientDateTo]);
+
+  const clearClientDateFilter = () => {
+    setClientDateFrom(undefined);
+    setClientDateTo(undefined);
+  };
 
   const getClientInvoiceCount = (clientId: string) => {
     return invoices.filter(inv => inv.clientId === clientId).length;
@@ -302,7 +323,7 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
               </Button>
             )}
             
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Badge
                 variant={invoiceTypeFilter === 'proforma' ? 'default' : 'outline'}
                 className={`cursor-pointer ${invoiceTypeFilter === 'proforma' ? 'bg-gray-700 hover:bg-gray-600' : 'hover:bg-secondary'}`}
@@ -317,6 +338,62 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
               >
                 Définitive
               </Badge>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "justify-start text-left font-normal",
+                      !clientDateFrom && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {clientDateFrom ? format(clientDateFrom, "dd/MM/yyyy") : "Du"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-50 bg-background" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={clientDateFrom}
+                    onSelect={setClientDateFrom}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "justify-start text-left font-normal",
+                      !clientDateTo && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {clientDateTo ? format(clientDateTo, "dd/MM/yyyy") : "Au"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-50 bg-background" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={clientDateTo}
+                    onSelect={setClientDateTo}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              {(clientDateFrom || clientDateTo) && (
+                <Button variant="ghost" size="sm" onClick={clearClientDateFilter}>
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             
             {clientInvoices.length === 0 ? (
