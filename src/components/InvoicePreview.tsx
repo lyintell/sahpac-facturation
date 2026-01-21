@@ -204,22 +204,23 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
 
           {/* Amounts */}
           <div className="border-t border-border pt-4 mt-6">
-            <div className="flex justify-end">
-              <div className="w-64 space-y-2">
-                <div className="flex justify-between">
-                  <span>Soit au forfait</span>
-                  <span className="font-medium">{invoice.amountHT.toLocaleString("fr-FR")} F</span>
+            <div className="space-y-2">
+              <div className="flex items-baseline">
+                <span className="shrink-0">Soit au forfait</span>
+                <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
+                <span className="font-medium shrink-0">{invoice.amountHT.toLocaleString("fr-FR")} F</span>
+              </div>
+              {invoice.tvaRate > 0 && (
+                <div className="flex items-baseline">
+                  <span className="shrink-0">TVA {invoice.tvaRate}%</span>
+                  <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
+                  <span className="font-medium shrink-0">{invoice.tvaAmount.toLocaleString("fr-FR")} F</span>
                 </div>
-                {invoice.tvaRate > 0 && (
-                  <div className="flex justify-between">
-                    <span>TVA {invoice.tvaRate}%</span>
-                    <span className="font-medium">{invoice.tvaAmount.toLocaleString("fr-FR")} F</span>
-                  </div>
-                )}
-                <div className="flex justify-between font-bold text-lg border-t pt-2">
-                  <span>Total{invoice.tvaRate > 0 ? " TTC" : ""}</span>
-                  <span>{invoice.totalAmount.toLocaleString("fr-FR")} F</span>
-                </div>
+              )}
+              <div className="flex items-baseline font-bold text-lg border-t pt-2">
+                <span className="shrink-0">Total{invoice.tvaRate > 0 ? " TTC" : ""}</span>
+                <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
+                <span className="shrink-0">{invoice.totalAmount.toLocaleString("fr-FR")} F</span>
               </div>
             </div>
           </div>
