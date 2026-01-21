@@ -135,7 +135,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
               alt="SAHPAC SARL - Société Africaine pour l'Hygiène Publique, L'Agriculture & le Commerce"
               className="w-full object-contain"
             />
-            <p className="text-sm text-muted-foreground text-right mt-2">Bamako, le {formattedDate}</p>
+            <p className="text-sm text-muted-foreground text-right mt-5 ms-5">Bamako, le {formattedDate}</p>
           </div>
 
           {/* Title */}
