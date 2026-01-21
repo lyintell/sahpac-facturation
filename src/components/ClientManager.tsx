@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Edit2, Save, X, Search, FileText } from 'lucide-react';
+import { Plus, Trash2, Edit2, Save, X, Search, FileText, FilePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,9 +29,10 @@ interface ClientManagerProps {
   onDeleteClient: (id: string) => void;
   onUpdateClient: (id: string, client: Partial<Client>) => void;
   onViewInvoice: (invoice: Invoice) => void;
+  onCreateInvoiceForClient?: (clientId: string) => void;
 }
 
-const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdateClient, onViewInvoice }: ClientManagerProps) => {
+const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdateClient, onViewInvoice, onCreateInvoiceForClient }: ClientManagerProps) => {
   const [newClientName, setNewClientName] = useState('');
   const [newClientAddress, setNewClientAddress] = useState('');
   const [newClientPhone, setNewClientPhone] = useState('');
@@ -213,6 +214,17 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
                         </>
                       ) : (
                       <>
+                          {onCreateInvoiceForClient && (
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              onClick={() => onCreateInvoiceForClient(client.id)}
+                              className="text-success hover:text-success/80"
+                              title="Créer une facture"
+                            >
+                              <FilePlus className="w-4 h-4" />
+                            </Button>
+                          )}
                           <Button 
                             size="sm" 
                             variant="ghost" 
@@ -268,6 +280,18 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
             <SheetTitle>Factures - {selectedClientForInvoices?.name}</SheetTitle>
           </SheetHeader>
           <div className="mt-6 space-y-3">
+            {onCreateInvoiceForClient && selectedClientForInvoices && (
+              <Button 
+                onClick={() => {
+                  onCreateInvoiceForClient(selectedClientForInvoices.id);
+                  setSelectedClientForInvoices(null);
+                }}
+                className="w-full"
+              >
+                <FilePlus className="w-4 h-4 mr-2" />
+                Nouvelle facture pour ce client
+              </Button>
+            )}
             {clientInvoices.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
                 Aucune facture pour ce client.

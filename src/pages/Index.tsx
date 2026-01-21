@@ -20,6 +20,7 @@ const Index = () => {
   ]);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [preselectedClientId, setPreselectedClientId] = useState<string | null>(null);
 
   const handleEditInvoice = useCallback((invoice: Invoice) => {
     setEditingInvoice(invoice);
@@ -28,7 +29,14 @@ const Index = () => {
 
   const handleCancelEdit = useCallback(() => {
     setEditingInvoice(null);
+    setPreselectedClientId(null);
     setActiveTab('invoices');
+  }, []);
+
+  const handleCreateInvoiceForClient = useCallback((clientId: string) => {
+    setPreselectedClientId(clientId);
+    setEditingInvoice(null);
+    setActiveTab('new');
   }, []);
 
   const generateInvoiceNumber = useCallback((isProForma: boolean) => {
@@ -141,6 +149,7 @@ const Index = () => {
             onDeleteClient={handleDeleteClient}
             onUpdateClient={handleUpdateClient}
             onViewInvoice={setSelectedInvoice}
+            onCreateInvoiceForClient={handleCreateInvoiceForClient}
           />
         )}
         
@@ -149,6 +158,7 @@ const Index = () => {
             clients={clients}
             zones={zones}
             editingInvoice={editingInvoice}
+            preselectedClientId={preselectedClientId}
             onAddClient={handleAddClient}
             onAddZone={handleAddZone}
             onCreateInvoice={handleCreateInvoice}
