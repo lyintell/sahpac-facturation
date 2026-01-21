@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Edit2, Save, X, Search } from 'lucide-react';
+import { Plus, Trash2, Edit2, Save, X, Search, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,16 +14,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Client } from '@/types';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Client, Invoice } from '@/types';
 
 interface ClientManagerProps {
   clients: Client[];
+  invoices: Invoice[];
   onAddClient: (client: Omit<Client, 'id' | 'createdAt'>) => void;
   onDeleteClient: (id: string) => void;
   onUpdateClient: (id: string, client: Partial<Client>) => void;
+  onViewInvoice: (invoice: Invoice) => void;
 }
 
-const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }: ClientManagerProps) => {
+const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdateClient, onViewInvoice }: ClientManagerProps) => {
   const [newClientName, setNewClientName] = useState('');
   const [newClientAddress, setNewClientAddress] = useState('');
   const [newClientPhone, setNewClientPhone] = useState('');
@@ -32,6 +41,16 @@ const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }:
   const [editPhone, setEditPhone] = useState('');
   const [deleteClient, setDeleteClient] = useState<Client | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedClientForInvoices, setSelectedClientForInvoices] = useState<Client | null>(null);
+
+  const clientInvoices = useMemo(() => {
+    if (!selectedClientForInvoices) return [];
+    return invoices.filter(inv => inv.clientId === selectedClientForInvoices.id);
+  }, [invoices, selectedClientForInvoices]);
+
+  const getClientInvoiceCount = (clientId: string) => {
+    return invoices.filter(inv => inv.clientId === clientId).length;
+  };
 
   const filteredClients = useMemo(() => {
     if (!searchQuery.trim()) return clients;
@@ -193,7 +212,16 @@ const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }:
                           </Button>
                         </>
                       ) : (
-                        <>
+                      <>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => setSelectedClientForInvoices(client)}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span className="ml-1 text-xs">({getClientInvoiceCount(client.id)})</span>
+                          </Button>
                           <Button size="sm" variant="ghost" onClick={() => startEdit(client)}>
                             <Edit2 className="w-4 h-4" />
                           </Button>
@@ -233,6 +261,49 @@ const ClientManager = ({ clients, onAddClient, onDeleteClient, onUpdateClient }:
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Sheet open={!!selectedClientForInvoices} onOpenChange={(open) => !open && setSelectedClientForInvoices(null)}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Factures - {selectedClientForInvoices?.name}</SheetTitle>
+          </SheetHeader>
+          <div className="mt-6 space-y-3">
+            {clientInvoices.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                Aucune facture pour ce client.
+              </p>
+            ) : (
+              clientInvoices.map((invoice) => (
+                <div
+                  key={invoice.id}
+                  className="p-4 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors cursor-pointer"
+                  onClick={() => {
+                    setSelectedClientForInvoices(null);
+                    onViewInvoice(invoice);
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">{invoice.invoiceNumber}</span>
+                    <Badge 
+                      variant={invoice.isProForma ? 'secondary' : 'default'}
+                      className={invoice.isProForma ? '' : 'bg-blue-100 text-blue-700'}
+                    >
+                      {invoice.isProForma ? 'Pro Forma' : 'Définitive'}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(invoice.date).toLocaleDateString('fr-FR')}
+                  </p>
+                  <p className="text-sm">{invoice.interventionTypeName}</p>
+                  <p className="font-semibold mt-1">
+                    {invoice.totalAmount.toLocaleString('fr-FR')} FCFA
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };
