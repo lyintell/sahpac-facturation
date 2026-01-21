@@ -203,7 +203,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           )}
 
           {/* Amounts */}
-          <div className="border-t border-border pt-4 mt-6">
+          <div className="pt-4 mt-6">
             <div className="space-y-2">
               <div className="flex items-baseline">
                 <span className="shrink-0">Soit au forfait</span>
