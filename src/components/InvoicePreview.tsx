@@ -117,7 +117,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
     >
       <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
         <div className="no-print flex justify-end gap-2 mb-4">
-          <Button onClick={handlePrint} className="bg-amber-500 hover:bg-amber-600 text-black">
+          <Button onClick={handlePrint} variant={null} className="bg-amber-500 hover:bg-amber-600 text-black">
             <Printer className="w-4 h-4 mr-2" />
             Imprimer
           </Button>
