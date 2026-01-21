@@ -148,11 +148,11 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
 
           {/* Client */}
           <p className="mb-4">
-            <span className="font-semibold">Doit :</span> {invoice.clientName}
+            <span className="font-semibold">Doit : {invoice.clientName}</span>
           </p>
 
           {/* Work Description */}
-          <p className="mb-6">{invoice.workDescription}</p>
+          <p className="mb-6 font-semibold">{invoice.workDescription}</p>
 
           {/* Intervention Type */}
           <div className="mb-6">
