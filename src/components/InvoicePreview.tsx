@@ -80,8 +80,11 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
   const totalInWords = numberToWords(Math.round(invoice.totalAmount));
 
   return (
-    <div className="fixed inset-0 bg-foreground/50 flex items-center justify-center p-4 z-50 overflow-auto">
-      <div className="max-w-4xl w-full">
+    <div 
+      className="fixed inset-0 bg-foreground/50 flex items-center justify-center p-4 z-50 overflow-auto"
+      onClick={onClose}
+    >
+      <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
         <div className="no-print flex justify-end gap-2 mb-4">
           <Button onClick={handlePrint} className="bg-success hover:bg-success/90">
             <Printer className="w-4 h-4 mr-2" />
