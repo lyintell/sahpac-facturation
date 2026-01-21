@@ -144,33 +144,63 @@
 }
 
 @media print {
+  @page {
+    margin: 0;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
   body {
     background: white !important;
     margin: 0 !important;
     padding: 0 !important;
   }
-  
-  body * {
-    visibility: hidden;
-  }
-  
-  .invoice-paper,
-  .invoice-paper * {
-    visibility: visible;
-  }
-  
-  .invoice-paper {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    box-shadow: none !important;
-    max-width: 100% !important;
+
+  #root {
+    max-width: none !important;
     margin: 0 !important;
-    padding: 20mm !important;
+    padding: 0 !important;
+    text-align: left !important;
   }
-  
+
   .no-print {
     display: none !important;
+  }
+
+  /* Print ONLY the invoice preview */
+  .print-scope > * {
+    display: none !important;
+  }
+
+  .print-scope > .print-container {
+    display: block !important;
+  }
+
+  .print-container {
+    position: static !important;
+    inset: auto !important;
+    overflow: visible !important;
+    background: transparent !important;
+    padding: 0 !important;
+    z-index: auto !important;
+    display: block !important;
+  }
+
+  .print-container > div {
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  .print-paper {
+    box-shadow: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20mm !important;
+    border-radius: 0 !important;
   }
 }
