@@ -157,6 +157,15 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
             </div>
           )}
 
+          {/* Observations */}
+          {invoice.observations && (
+            <div className="mb-6">
+              <p>
+                <span className="font-semibold text-primary">OBSERVATIONS</span> : {invoice.observations}
+              </p>
+            </div>
+          )}
+
           {/* Amounts */}
           <div className="border-t border-border pt-4 mt-6">
             <div className="flex justify-end">
