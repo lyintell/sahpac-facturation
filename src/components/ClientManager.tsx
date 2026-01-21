@@ -312,7 +312,7 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
                       variant={invoice.isProForma ? 'secondary' : 'default'}
                       className={invoice.isProForma ? '' : 'bg-blue-100 text-blue-700'}
                     >
-                      {invoice.isProForma ? 'Pro Forma' : 'Définitive'}
+                      {invoice.isProForma ? 'Pro Forma' : 'Definitive'}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
