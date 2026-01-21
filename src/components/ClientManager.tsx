@@ -43,11 +43,20 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
   const [deleteClient, setDeleteClient] = useState<Client | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClientForInvoices, setSelectedClientForInvoices] = useState<Client | null>(null);
+  const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<'all' | 'proforma' | 'definitive'>('all');
 
   const clientInvoices = useMemo(() => {
     if (!selectedClientForInvoices) return [];
-    return invoices.filter(inv => inv.clientId === selectedClientForInvoices.id);
-  }, [invoices, selectedClientForInvoices]);
+    let filtered = invoices.filter(inv => inv.clientId === selectedClientForInvoices.id);
+    
+    if (invoiceTypeFilter === 'proforma') {
+      filtered = filtered.filter(inv => inv.isProForma !== false);
+    } else if (invoiceTypeFilter === 'definitive') {
+      filtered = filtered.filter(inv => inv.isProForma === false);
+    }
+    
+    return filtered;
+  }, [invoices, selectedClientForInvoices, invoiceTypeFilter]);
 
   const getClientInvoiceCount = (clientId: string) => {
     return invoices.filter(inv => inv.clientId === clientId).length;
@@ -292,9 +301,29 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
                 Nouvelle facture pour ce client
               </Button>
             )}
+            
+            <div className="flex gap-2">
+              <Badge
+                variant={invoiceTypeFilter === 'proforma' ? 'default' : 'outline'}
+                className={`cursor-pointer ${invoiceTypeFilter === 'proforma' ? 'bg-gray-700 hover:bg-gray-600' : 'hover:bg-secondary'}`}
+                onClick={() => setInvoiceTypeFilter(invoiceTypeFilter === 'proforma' ? 'all' : 'proforma')}
+              >
+                Pro Forma
+              </Badge>
+              <Badge
+                variant={invoiceTypeFilter === 'definitive' ? 'default' : 'outline'}
+                className={`cursor-pointer ${invoiceTypeFilter === 'definitive' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'hover:bg-secondary'}`}
+                onClick={() => setInvoiceTypeFilter(invoiceTypeFilter === 'definitive' ? 'all' : 'definitive')}
+              >
+                Definitive
+              </Badge>
+            </div>
+            
             {clientInvoices.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                Aucune facture pour ce client.
+                {invoiceTypeFilter === 'all' 
+                  ? "Aucune facture pour ce client."
+                  : `Aucune facture ${invoiceTypeFilter === 'proforma' ? 'Pro Forma' : 'Définitive'} pour ce client.`}
               </p>
             ) : (
               clientInvoices.map((invoice) => (
