@@ -13,6 +13,7 @@ interface InvoiceFormProps {
   clients: Client[];
   zones: ZoneIntervention[];
   editingInvoice?: Invoice | null;
+  preselectedClientId?: string | null;
   onAddClient: (client: Omit<Client, 'id' | 'createdAt'>) => void;
   onAddZone: (zone: Omit<ZoneIntervention, 'id'>) => void;
   onCreateInvoice: (invoice: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => void;
@@ -20,7 +21,7 @@ interface InvoiceFormProps {
   onCancelEdit?: () => void;
 }
 
-const InvoiceForm = ({ clients, zones, editingInvoice, onAddClient, onAddZone, onCreateInvoice, onUpdateInvoice, onCancelEdit }: InvoiceFormProps) => {
+const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAddClient, onAddZone, onCreateInvoice, onUpdateInvoice, onCancelEdit }: InvoiceFormProps) => {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [newClientName, setNewClientName] = useState('');
   const [newClientAddress, setNewClientAddress] = useState('');
@@ -43,7 +44,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, onAddClient, onAddZone, o
   const [isProForma, setIsProForma] = useState(true);
   const [observations, setObservations] = useState('');
 
-  // Load editing invoice data
+  // Load editing invoice data or preselected client
   useEffect(() => {
     if (editingInvoice) {
       setSelectedClientId(editingInvoice.clientId);
@@ -57,8 +58,10 @@ const InvoiceForm = ({ clients, zones, editingInvoice, onAddClient, onAddZone, o
       setIncludeTva(editingInvoice.tvaRate > 0);
       setIsProForma(editingInvoice.isProForma !== false);
       setObservations(editingInvoice.observations || '');
+    } else if (preselectedClientId) {
+      setSelectedClientId(preselectedClientId);
     }
-  }, [editingInvoice]);
+  }, [editingInvoice, preselectedClientId]);
 
   const resetForm = () => {
     setSelectedClientId('');
