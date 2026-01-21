@@ -148,7 +148,8 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
 
           {/* Client */}
           <p className="mb-4">
-            <span className="font-semibold underline">Doit : {invoice.clientName}</span>
+            <span className="font-semibold underline">Doit : </span>{" "}
+            <span className="font-semibold">{invoice.clientName}</span>
           </p>
 
           {/* Work Description */}
