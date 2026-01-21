@@ -112,12 +112,12 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
 
   return (
     <div
-      className="fixed inset-0 bg-foreground/50 flex items-center justify-center p-4 z-50 overflow-auto"
+      className="print-container fixed inset-0 bg-foreground/50 flex items-center justify-center p-4 z-50 overflow-auto"
       onClick={onClose}
     >
       <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
         <div className="no-print flex justify-end gap-2 mb-4">
-          <Button onClick={handlePrint} variant={null} className="bg-amber-500 hover:bg-amber-600 text-black">
+          <Button onClick={handlePrint} variant="secondary" className="bg-warning hover:bg-warning/90 text-warning-foreground">
             <Printer className="w-4 h-4 mr-2" />
             Imprimer
           </Button>
@@ -127,7 +127,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           </Button>
         </div>
 
-        <div className="invoice-paper bg-card">
+        <div className="invoice-paper print-paper bg-card">
           {/* Header with letterhead image */}
           <div className="invoice-header border-b-0 pb-0">
             <img
