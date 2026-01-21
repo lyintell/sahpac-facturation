@@ -111,7 +111,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                   className={`cursor-pointer hover:opacity-80 transition-opacity ${typeFilter === 'definitive' ? 'bg-gray-700 hover:bg-gray-700' : 'bg-blue-100 text-blue-700 hover:bg-blue-100'}`}
                   onClick={() => toggleTypeFilter('definitive')}
                 >
-                  {definitiveCount} Definitives
+                  {definitiveCount} Définitives
                 </Badge>
               </div>
             </div>
@@ -152,7 +152,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                       <td className="py-3 px-2 font-medium">{invoice.invoiceNumber}</td>
                       <td className="py-3 px-2">
                         <Badge variant={invoice.isProForma !== false ? 'secondary' : 'default'}>
-                          {invoice.isProForma !== false ? 'Pro Forma' : 'Definitive'}
+                          {invoice.isProForma !== false ? 'Pro Forma' : 'Définitive'}
                         </Badge>
                       </td>
                       <td className="py-3 px-2">
@@ -174,7 +174,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                               size="sm"
                               variant="ghost"
                               onClick={() => setConvertInvoice(invoice)}
-                              title="Convertir en facture definitive"
+                              title="Convertir en facture définitive"
                             >
                               <FileCheck className="w-4 h-4" />
                             </Button>
@@ -244,9 +244,9 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
       <AlertDialog open={!!convertInvoice} onOpenChange={(open) => !open && setConvertInvoice(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Convertir en facture definitive</AlertDialogTitle>
+            <AlertDialogTitle>Convertir en facture définitive</AlertDialogTitle>
             <AlertDialogDescription>
-              Êtes-vous sûr de vouloir convertir la facture pro forma <strong>{convertInvoice?.invoiceNumber}</strong> en facture definitive ?
+              Êtes-vous sûr de vouloir convertir la facture pro forma <strong>{convertInvoice?.invoiceNumber}</strong> en facture définitive ?
               Cette action est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
