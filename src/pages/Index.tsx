@@ -136,9 +136,11 @@ const Index = () => {
         {activeTab === 'clients' && (
           <ClientManager
             clients={clients}
+            invoices={invoices}
             onAddClient={handleAddClient}
             onDeleteClient={handleDeleteClient}
             onUpdateClient={handleUpdateClient}
+            onViewInvoice={setSelectedInvoice}
           />
         )}
         
