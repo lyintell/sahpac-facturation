@@ -315,7 +315,7 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
                 className={`cursor-pointer ${invoiceTypeFilter === 'definitive' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'hover:bg-secondary'}`}
                 onClick={() => setInvoiceTypeFilter(invoiceTypeFilter === 'definitive' ? 'all' : 'definitive')}
               >
-                Definitive
+                Définitive
               </Badge>
             </div>
             
@@ -341,7 +341,7 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
                       variant={invoice.isProForma ? 'secondary' : 'default'}
                       className={invoice.isProForma ? '' : 'bg-blue-100 text-blue-700'}
                     >
-                      {invoice.isProForma ? 'Pro Forma' : 'Definitive'}
+                      {invoice.isProForma ? 'Pro Forma' : 'Définitive'}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
