@@ -146,14 +146,31 @@
 @media print {
   body {
     background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  body * {
+    visibility: hidden;
+  }
+  
+  .invoice-paper,
+  .invoice-paper * {
+    visibility: visible;
+  }
+  
+  .invoice-paper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20mm !important;
   }
   
   .no-print {
     display: none !important;
-  }
-  
-  .invoice-paper {
-    box-shadow: none !important;
-    max-width: 100% !important;
   }
 }
