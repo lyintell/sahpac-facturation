@@ -1,11 +1,14 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Eye, Trash2, FileText, FileCheck, Search, Edit2, Copy } from 'lucide-react';
+import { Eye, Trash2, FileText, FileCheck, Search, Edit2, Copy, CalendarIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +36,8 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
   const [convertInvoice, setConvertInvoice] = useState<Invoice | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'proforma' | 'definitive'>('all');
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
 
   const filteredInvoices = useMemo(() => {
     let filtered = invoices;
@@ -42,6 +47,16 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
       filtered = filtered.filter(inv => inv.isProForma !== false);
     } else if (typeFilter === 'definitive') {
       filtered = filtered.filter(inv => inv.isProForma === false);
+    }
+    
+    // Filter by date range
+    if (dateFrom) {
+      filtered = filtered.filter(inv => new Date(inv.date) >= dateFrom);
+    }
+    if (dateTo) {
+      const endOfDay = new Date(dateTo);
+      endOfDay.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(inv => new Date(inv.date) <= endOfDay);
     }
     
     // Filter by search query
@@ -55,7 +70,12 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
     }
     
     return filtered;
-  }, [invoices, clients, searchQuery, typeFilter]);
+  }, [invoices, clients, searchQuery, typeFilter, dateFrom, dateTo]);
+
+  const clearDateFilter = () => {
+    setDateFrom(undefined);
+    setDateTo(undefined);
+  };
 
   const proFormaCount = useMemo(() => invoices.filter(inv => inv.isProForma !== false).length, [invoices]);
   const definitiveCount = useMemo(() => invoices.filter(inv => inv.isProForma === false).length, [invoices]);
@@ -96,23 +116,80 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
       <div className="space-y-4 animate-fade-in">
         <Card>
           <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <CardTitle>Factures ({invoices.length})</CardTitle>
-              <div className="flex gap-2">
-                <Badge 
-                  variant={typeFilter === 'proforma' ? 'default' : 'secondary'} 
-                  className={`cursor-pointer hover:opacity-80 transition-opacity ${typeFilter === 'proforma' ? 'bg-gray-700 hover:bg-gray-700' : ''}`}
-                  onClick={() => toggleTypeFilter('proforma')}
-                >
-                  {proFormaCount} Pro Forma
-                </Badge>
-                <Badge 
-                  variant={typeFilter === 'definitive' ? 'default' : 'secondary'} 
-                  className={`cursor-pointer hover:opacity-80 transition-opacity ${typeFilter === 'definitive' ? 'bg-gray-700 hover:bg-gray-700' : 'bg-blue-100 text-blue-700 hover:bg-blue-100'}`}
-                  onClick={() => toggleTypeFilter('definitive')}
-                >
-                  {definitiveCount} Définitives
-                </Badge>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <CardTitle>Factures ({invoices.length})</CardTitle>
+                <div className="flex gap-2">
+                  <Badge 
+                    variant={typeFilter === 'proforma' ? 'default' : 'secondary'} 
+                    className={`cursor-pointer hover:opacity-80 transition-opacity ${typeFilter === 'proforma' ? 'bg-gray-700 hover:bg-gray-700' : ''}`}
+                    onClick={() => toggleTypeFilter('proforma')}
+                  >
+                    {proFormaCount} Pro Forma
+                  </Badge>
+                  <Badge 
+                    variant={typeFilter === 'definitive' ? 'default' : 'secondary'} 
+                    className={`cursor-pointer hover:opacity-80 transition-opacity ${typeFilter === 'definitive' ? 'bg-gray-700 hover:bg-gray-700' : 'bg-blue-100 text-blue-700 hover:bg-blue-100'}`}
+                    onClick={() => toggleTypeFilter('definitive')}
+                  >
+                    {definitiveCount} Définitives
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "justify-start text-left font-normal",
+                        !dateFrom && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Du"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 z-50 bg-background" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateFrom}
+                      onSelect={setDateFrom}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "justify-start text-left font-normal",
+                        !dateTo && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateTo ? format(dateTo, "dd/MM/yyyy") : "Au"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 z-50 bg-background" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateTo}
+                      onSelect={setDateTo}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                {(dateFrom || dateTo) && (
+                  <Button variant="ghost" size="sm" onClick={clearDateFilter}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
