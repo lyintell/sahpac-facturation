@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Eye, Trash2, FileText, FileCheck, Search, Edit2, Copy, CalendarIcon, X, CheckCircle } from 'lucide-react';
+import { Eye, Trash2, FileText, FileCheck, Search, Edit2, Copy, CalendarIcon, X, Banknote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -285,7 +285,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                               title="Marquer comme payée"
                               className="text-green-600 hover:text-green-700"
                             >
-                              <CheckCircle className="w-4 h-4" />
+                              <Banknote className="w-4 h-4" />
                             </Button>
                           )}
                           <Button
