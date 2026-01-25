@@ -14,7 +14,143 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          client_address: string | null
+          client_id: string
+          client_name: string
+          created_at: string
+          date: string
+          id: string
+          include_tva: boolean
+          intervention_type_id: string
+          intervention_type_name: string
+          invoice_number: string
+          is_pro_forma: boolean
+          items: Json
+          observations: string | null
+          paid_at: string | null
+          status: string | null
+          subtotal: number
+          total_amount: number
+          tva_amount: number
+          tva_rate: number
+          updated_at: string
+          user_id: string
+          zone_ids: string[] | null
+          zone_names: string[] | null
+        }
+        Insert: {
+          client_address?: string | null
+          client_id: string
+          client_name: string
+          created_at?: string
+          date?: string
+          id?: string
+          include_tva?: boolean
+          intervention_type_id: string
+          intervention_type_name: string
+          invoice_number: string
+          is_pro_forma?: boolean
+          items?: Json
+          observations?: string | null
+          paid_at?: string | null
+          status?: string | null
+          subtotal?: number
+          total_amount?: number
+          tva_amount?: number
+          tva_rate?: number
+          updated_at?: string
+          user_id: string
+          zone_ids?: string[] | null
+          zone_names?: string[] | null
+        }
+        Update: {
+          client_address?: string | null
+          client_id?: string
+          client_name?: string
+          created_at?: string
+          date?: string
+          id?: string
+          include_tva?: boolean
+          intervention_type_id?: string
+          intervention_type_name?: string
+          invoice_number?: string
+          is_pro_forma?: boolean
+          items?: Json
+          observations?: string | null
+          paid_at?: string | null
+          status?: string | null
+          subtotal?: number
+          total_amount?: number
+          tva_amount?: number
+          tva_rate?: number
+          updated_at?: string
+          user_id?: string
+          zone_ids?: string[] | null
+          zone_names?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zones: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

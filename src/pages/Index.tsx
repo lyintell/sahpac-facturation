@@ -1,23 +1,19 @@
 import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
 import Header from '@/components/Header';
 import ClientManager from '@/components/ClientManager';
 import InvoiceForm from '@/components/InvoiceForm';
 import InvoiceList from '@/components/InvoiceList';
 import InvoicePreview from '@/components/InvoicePreview';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Client, Invoice, ZoneIntervention } from '@/types';
+import { useClients } from '@/hooks/useClients';
+import { useInvoices } from '@/hooks/useInvoices';
+import { useZones } from '@/hooks/useZones';
+import { Invoice, ZoneIntervention, Client } from '@/types';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'invoices' | 'clients' | 'new'>('invoices');
-  const [clients, setClients] = useLocalStorage<Client[]>('sahpac-clients', []);
-  const [invoices, setInvoices] = useLocalStorage<Invoice[]>('sahpac-invoices', []);
-  const [zones, setZones] = useLocalStorage<ZoneIntervention[]>('sahpac-zones', [
-    { id: '1', name: 'Premier local' },
-    { id: '2', name: 'Petit magasin' },
-    { id: '3', name: 'Entrepôt' },
-    { id: '4', name: 'La cour' },
-  ]);
+  const { clients, loading: clientsLoading, addClient, updateClient, deleteClient } = useClients();
+  const { invoices, loading: invoicesLoading, createInvoice, updateInvoice, deleteInvoice, copyInvoice } = useInvoices();
+  const { zones, loading: zonesLoading, addZone } = useZones();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [preselectedClientId, setPreselectedClientId] = useState<string | null>(null);
@@ -39,90 +35,67 @@ const Index = () => {
     setActiveTab('new');
   }, []);
 
-  const generateInvoiceNumber = useCallback((isProForma: boolean) => {
-    const year = new Date().getFullYear();
-    const prefix = isProForma ? 'PF' : 'FAC';
-    const count = invoices.filter(inv => {
-      const invYear = new Date(inv.date).getFullYear();
-      const invIsProForma = inv.isProForma !== false;
-      return invYear === year && invIsProForma === isProForma;
-    }).length + 1;
-    return `${prefix}-${year}-${String(count).padStart(4, '0')}`;
-  }, [invoices]);
+  const handleAddClient = useCallback(async (clientData: Omit<Client, 'id' | 'createdAt'>) => {
+    await addClient(clientData);
+  }, [addClient]);
 
-  const handleAddClient = useCallback((clientData: Omit<Client, 'id' | 'createdAt'>) => {
-    const newClient: Client = {
-      ...clientData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    setClients(prev => [...prev, newClient]);
-    toast.success(`Client "${clientData.name}" ajouté avec succès`);
-  }, [setClients]);
+  const handleDeleteClient = useCallback(async (id: string) => {
+    await deleteClient(id);
+  }, [deleteClient]);
 
-  const handleDeleteClient = useCallback((id: string) => {
-    setClients(prev => prev.filter(c => c.id !== id));
-    toast.success('Client supprimé');
-  }, [setClients]);
+  const handleUpdateClient = useCallback(async (id: string, data: Partial<Client>) => {
+    await updateClient(id, data);
+  }, [updateClient]);
 
-  const handleUpdateClient = useCallback((id: string, data: Partial<Client>) => {
-    setClients(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
-    toast.success('Client mis à jour');
-  }, [setClients]);
+  const handleAddZone = useCallback(async (zone: Omit<ZoneIntervention, 'id'>) => {
+    await addZone(zone);
+  }, [addZone]);
 
-  const handleAddZone = useCallback((zone: Omit<ZoneIntervention, 'id'>) => {
-    const newZone: ZoneIntervention = {
-      ...zone,
-      id: Date.now().toString(),
-    };
-    setZones(prev => [...prev, newZone]);
-  }, [setZones]);
+  const handleCreateInvoice = useCallback(async (invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => {
+    const newInvoice = await createInvoice(invoiceData);
+    if (newInvoice) {
+      setActiveTab('invoices');
+      setSelectedInvoice(newInvoice);
+    }
+  }, [createInvoice]);
 
-  const handleCreateInvoice = useCallback((invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => {
-    const isProForma = invoiceData.isProForma !== false;
-    const newInvoice: Invoice = {
-      ...invoiceData,
-      id: Date.now().toString(),
-      invoiceNumber: generateInvoiceNumber(isProForma),
-      createdAt: new Date(),
-    };
-    setInvoices(prev => [newInvoice, ...prev]);
-    toast.success(`${isProForma ? 'Pro Forma' : 'Facture'} ${newInvoice.invoiceNumber} créée avec succès`);
-    setActiveTab('invoices');
-    setSelectedInvoice(newInvoice);
-  }, [generateInvoiceNumber, setInvoices]);
+  const handleDeleteInvoice = useCallback(async (id: string) => {
+    await deleteInvoice(id);
+  }, [deleteInvoice]);
 
-  const handleDeleteInvoice = useCallback((id: string) => {
-    setInvoices(prev => prev.filter(inv => inv.id !== id));
-    toast.success('Facture supprimée');
-  }, [setInvoices]);
+  const handleCopyInvoice = useCallback(async (invoice: Invoice) => {
+    const newInvoice = await copyInvoice(invoice);
+    if (newInvoice) {
+      setSelectedInvoice(newInvoice);
+    }
+  }, [copyInvoice]);
 
-  const handleCopyInvoice = useCallback((invoice: Invoice) => {
-    const isProForma = invoice.isProForma !== false;
-    const newInvoice: Invoice = {
-      ...invoice,
-      id: Date.now().toString(),
-      invoiceNumber: generateInvoiceNumber(isProForma),
-      date: new Date(),
-      createdAt: new Date(),
-    };
-    setInvoices(prev => [newInvoice, ...prev]);
-    toast.success(`Copie ${newInvoice.invoiceNumber} créée`);
-    setSelectedInvoice(newInvoice);
-  }, [generateInvoiceNumber, setInvoices]);
+  const handleUpdateInvoice = useCallback(async (id: string, data: Partial<Invoice>) => {
+    await updateInvoice(id, data);
+  }, [updateInvoice]);
 
-  const handleUpdateInvoice = useCallback((id: string, data: Partial<Invoice>) => {
-    setInvoices(prev => prev.map(inv => {
-      if (inv.id !== id) return inv;
-      // If converting from proforma to definitive, generate new number
-      if (data.isProForma === false && inv.isProForma !== false) {
-        const newNumber = generateInvoiceNumber(false);
-        return { ...inv, ...data, invoiceNumber: newNumber };
-      }
-      return { ...inv, ...data };
-    }));
-    toast.success('Facture mise à jour');
-  }, [setInvoices, generateInvoiceNumber]);
+  // Map zones to the expected format
+  const zonesData: ZoneIntervention[] = zones.map(z => ({ id: z.id, name: z.name }));
+  
+  // Map clients to the expected format with createdAt
+  const clientsData: Client[] = clients.map(c => ({
+    id: c.id,
+    name: c.name,
+    address: c.address,
+    phone: c.phone,
+    email: c.email,
+    createdAt: c.created_at ? new Date(c.created_at) : new Date(),
+  }));
+
+  const isLoading = clientsLoading || invoicesLoading || zonesLoading;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background print-scope">
@@ -132,7 +105,7 @@ const Index = () => {
         {activeTab === 'invoices' && (
           <InvoiceList
             invoices={invoices}
-            clients={clients}
+            clients={clientsData}
             onViewInvoice={setSelectedInvoice}
             onEditInvoice={handleEditInvoice}
             onDeleteInvoice={handleDeleteInvoice}
@@ -143,7 +116,7 @@ const Index = () => {
         
         {activeTab === 'clients' && (
           <ClientManager
-            clients={clients}
+            clients={clientsData}
             invoices={invoices}
             onAddClient={handleAddClient}
             onDeleteClient={handleDeleteClient}
@@ -155,8 +128,8 @@ const Index = () => {
         
         {activeTab === 'new' && (
           <InvoiceForm
-            clients={clients}
-            zones={zones}
+            clients={clientsData}
+            zones={zonesData}
             editingInvoice={editingInvoice}
             preselectedClientId={preselectedClientId}
             onAddClient={handleAddClient}
