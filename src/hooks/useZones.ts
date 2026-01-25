@@ -1,0 +1,97 @@
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+
+export interface Zone {
+  id: string;
+  name: string;
+  created_at?: string;
+}
+
+export const useZones = () => {
+  const [zones, setZones] = useState<Zone[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  const fetchZones = useCallback(async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('zones')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      console.error('Error fetching zones:', error);
+      toast.error('Erreur lors du chargement des zones');
+    } else {
+      setZones(data || []);
+    }
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    fetchZones();
+  }, [fetchZones]);
+
+  const addZone = useCallback(async (zone: { name: string }) => {
+    if (!user) return null;
+    
+    const { data, error } = await supabase
+      .from('zones')
+      .insert({ ...zone, user_id: user.id })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error adding zone:', error);
+      toast.error('Erreur lors de l\'ajout de la zone');
+      return null;
+    }
+    
+    setZones(prev => [...prev, data]);
+    return data;
+  }, [user]);
+
+  const deleteZone = useCallback(async (id: string) => {
+    const { error } = await supabase
+      .from('zones')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting zone:', error);
+      toast.error('Erreur lors de la suppression de la zone');
+      return;
+    }
+    
+    setZones(prev => prev.filter(z => z.id !== id));
+  }, []);
+
+  // Initialize default zones if none exist
+  const initializeDefaultZones = useCallback(async () => {
+    if (!user || zones.length > 0 || loading) return;
+    
+    const defaultZones = [
+      { name: 'Premier local' },
+      { name: 'Petit magasin' },
+      { name: 'Entrepôt' },
+      { name: 'La cour' },
+    ];
+    
+    for (const zone of defaultZones) {
+      await supabase.from('zones').insert({ ...zone, user_id: user.id });
+    }
+    
+    fetchZones();
+  }, [user, zones.length, loading, fetchZones]);
+
+  useEffect(() => {
+    if (!loading && zones.length === 0 && user) {
+      initializeDefaultZones();
+    }
+  }, [loading, zones.length, user, initializeDefaultZones]);
+
+  return { zones, loading, addZone, deleteZone, refetch: fetchZones };
+};
