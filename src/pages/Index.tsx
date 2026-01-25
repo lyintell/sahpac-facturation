@@ -111,6 +111,7 @@ const Index = () => {
             onDeleteInvoice={handleDeleteInvoice}
             onUpdateInvoice={handleUpdateInvoice}
             onCopyInvoice={handleCopyInvoice}
+            onNewInvoice={() => setActiveTab('new')}
           />
         )}
         
