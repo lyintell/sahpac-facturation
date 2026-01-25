@@ -223,7 +223,8 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                 <thead>
                   <tr className="border-b">
                     <th className="text-left py-3 px-2 font-medium text-muted-foreground">N°</th>
-                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">Statut</th>
+                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">Type facture</th>
+                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">Statut paiement</th>
                     <th className="text-left py-3 px-2 font-medium text-muted-foreground">Date</th>
                     <th className="text-left py-3 px-2 font-medium text-muted-foreground">Client</th>
                     <th className="text-left py-3 px-2 font-medium text-muted-foreground">Type</th>
@@ -236,19 +237,21 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                     <tr key={invoice.id} className="border-b hover:bg-secondary/50 transition-colors">
                       <td className="py-3 px-2 font-medium">{invoice.invoiceNumber}</td>
                       <td className="py-3 px-2">
-                        <div className="flex flex-col gap-1">
-                          <Badge variant={invoice.isProForma !== false ? 'secondary' : 'default'}>
-                            {invoice.isProForma !== false ? 'Pro Forma' : 'Définitive'}
+                        <Badge variant={invoice.isProForma !== false ? 'secondary' : 'default'}>
+                          {invoice.isProForma !== false ? 'Pro Forma' : 'Définitive'}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-2">
+                        {invoice.isProForma === false ? (
+                          <Badge 
+                            variant={invoice.status === 'paid' ? 'default' : 'outline'}
+                            className={invoice.status === 'paid' ? 'bg-green-600 hover:bg-green-600' : 'text-orange-600 border-orange-600'}
+                          >
+                            {invoice.status === 'paid' ? 'Payée' : 'En attente'}
                           </Badge>
-                          {invoice.isProForma === false && (
-                            <Badge 
-                              variant={invoice.status === 'paid' ? 'default' : 'outline'}
-                              className={invoice.status === 'paid' ? 'bg-green-600 hover:bg-green-600' : 'text-orange-600 border-orange-600'}
-                            >
-                              {invoice.status === 'paid' ? 'Payée' : 'En attente'}
-                            </Badge>
-                          )}
-                        </div>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
                       </td>
                       <td className="py-3 px-2">
                         {format(new Date(invoice.date), 'dd/MM/yyyy', { locale: fr })}
