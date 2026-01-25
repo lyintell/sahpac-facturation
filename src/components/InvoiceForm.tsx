@@ -145,6 +145,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
       tvaAmount,
       totalAmount,
       isProForma,
+      status: editingInvoice?.status || 'pending',
     };
 
     if (editingInvoice && onUpdateInvoice) {

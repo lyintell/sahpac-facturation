@@ -127,9 +127,18 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           </Button>
         </div>
 
-        <div className="invoice-paper print-paper bg-card">
+        <div className="invoice-paper print-paper bg-card relative overflow-hidden">
+          {/* PAYÉ Watermark */}
+          {invoice.status === 'paid' && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+              <span className="text-green-500/20 text-[120px] font-bold rotate-[-30deg] select-none tracking-widest">
+                PAYÉ
+              </span>
+            </div>
+          )}
+          
           {/* Header with letterhead image */}
-          <div className="invoice-header border-b-0 pb-0">
+          <div className="invoice-header border-b-0 pb-0 relative z-20">
             <img
               src="/sahpac-header.png"
               alt="SAHPAC SARL - Société Africaine pour l'Hygiène Publique, L'Agriculture & le Commerce"

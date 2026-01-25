@@ -18,6 +18,8 @@ export interface ZoneIntervention {
   name: string;
 }
 
+export type InvoiceStatus = 'pending' | 'paid';
+
 export interface Invoice {
   id: string;
   invoiceNumber: string;
@@ -37,6 +39,8 @@ export interface Invoice {
   tvaAmount: number;
   totalAmount: number;
   isProForma: boolean;
+  status: InvoiceStatus;
+  paidAt?: Date;
   createdAt: Date;
 }
 
