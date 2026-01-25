@@ -414,12 +414,22 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium">{invoice.invoiceNumber}</span>
-                    <Badge 
-                      variant={invoice.isProForma ? 'secondary' : 'default'}
-                      className={invoice.isProForma ? '' : 'bg-blue-100 text-blue-700'}
-                    >
-                      {invoice.isProForma ? 'Pro Forma' : 'Définitive'}
-                    </Badge>
+                    <div className="flex gap-2">
+                      <Badge 
+                        variant={invoice.isProForma ? 'secondary' : 'default'}
+                        className={invoice.isProForma ? '' : 'bg-blue-100 text-blue-700'}
+                      >
+                        {invoice.isProForma ? 'Pro Forma' : 'Définitive'}
+                      </Badge>
+                      {invoice.isProForma === false && (
+                        <Badge 
+                          variant={invoice.status === 'paid' ? 'default' : 'outline'}
+                          className={invoice.status === 'paid' ? 'bg-green-600 hover:bg-green-600' : 'text-orange-600 border-orange-600'}
+                        >
+                          {invoice.status === 'paid' ? 'Payée' : 'En attente'}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {new Date(invoice.date).toLocaleDateString('fr-FR')}
