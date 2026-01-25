@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Eye, Trash2, FileText, FileCheck, Search, Edit2, Copy, CalendarIcon, X } from 'lucide-react';
+import { Eye, Trash2, FileText, FileCheck, Search, Edit2, Copy, CalendarIcon, X, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,6 +34,7 @@ interface InvoiceListProps {
 const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDeleteInvoice, onUpdateInvoice, onCopyInvoice }: InvoiceListProps) => {
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
   const [convertInvoice, setConvertInvoice] = useState<Invoice | null>(null);
+  const [payInvoice, setPayInvoice] = useState<Invoice | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'proforma' | 'definitive'>('all');
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
@@ -95,6 +96,13 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
     if (convertInvoice) {
       onUpdateInvoice(convertInvoice.id, { isProForma: false });
       setConvertInvoice(null);
+    }
+  };
+
+  const handleConfirmPay = () => {
+    if (payInvoice) {
+      onUpdateInvoice(payInvoice.id, { status: 'paid', paidAt: new Date() });
+      setPayInvoice(null);
     }
   };
 
@@ -228,9 +236,19 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                     <tr key={invoice.id} className="border-b hover:bg-secondary/50 transition-colors">
                       <td className="py-3 px-2 font-medium">{invoice.invoiceNumber}</td>
                       <td className="py-3 px-2">
-                        <Badge variant={invoice.isProForma !== false ? 'secondary' : 'default'}>
-                          {invoice.isProForma !== false ? 'Pro Forma' : 'Définitive'}
-                        </Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge variant={invoice.isProForma !== false ? 'secondary' : 'default'}>
+                            {invoice.isProForma !== false ? 'Pro Forma' : 'Définitive'}
+                          </Badge>
+                          {invoice.isProForma === false && (
+                            <Badge 
+                              variant={invoice.status === 'paid' ? 'default' : 'outline'}
+                              className={invoice.status === 'paid' ? 'bg-green-600 hover:bg-green-600' : 'text-orange-600 border-orange-600'}
+                            >
+                              {invoice.status === 'paid' ? 'Payée' : 'En attente'}
+                            </Badge>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-2">
                         {format(new Date(invoice.date), 'dd/MM/yyyy', { locale: fr })}
@@ -254,6 +272,17 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                               title="Convertir en facture définitive"
                             >
                               <FileCheck className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {invoice.isProForma === false && invoice.status !== 'paid' && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setPayInvoice(invoice)}
+                              title="Marquer comme payée"
+                              className="text-green-600 hover:text-green-700"
+                            >
+                              <CheckCircle className="w-4 h-4" />
                             </Button>
                           )}
                           <Button
@@ -331,6 +360,23 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmConvert}>
               Convertir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!payInvoice} onOpenChange={(open) => !open && setPayInvoice(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Marquer comme payée</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir marquer la facture <strong>{payInvoice?.invoiceNumber}</strong> comme payée ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmPay} className="bg-green-600 hover:bg-green-700">
+              Confirmer le paiement
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
