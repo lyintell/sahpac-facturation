@@ -132,7 +132,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           {invoice.status === 'paid' && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
               <span className="text-green-500/20 text-[120px] font-bold rotate-[-30deg] select-none tracking-widest">
-                PAYÉ
+                PAYÉE
               </span>
             </div>
           )}
