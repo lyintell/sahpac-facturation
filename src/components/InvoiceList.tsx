@@ -224,11 +224,11 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                   <tr className="border-b">
                     <th className="text-left py-3 px-2 font-medium text-muted-foreground">N°</th>
                     <th className="text-left py-3 px-2 font-medium text-muted-foreground">Type facture</th>
-                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">Statut paiement</th>
                     <th className="text-left py-3 px-2 font-medium text-muted-foreground">Date</th>
                     <th className="text-left py-3 px-2 font-medium text-muted-foreground">Client</th>
                     <th className="text-left py-3 px-2 font-medium text-muted-foreground">Type</th>
                     <th className="text-right py-3 px-2 font-medium text-muted-foreground">Total</th>
+                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">Statut paiement</th>
                     <th className="text-right py-3 px-2 font-medium text-muted-foreground">Actions</th>
                   </tr>
                 </thead>
@@ -242,18 +242,6 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                         </Badge>
                       </td>
                       <td className="py-3 px-2">
-                        {invoice.isProForma === false ? (
-                          <Badge 
-                            variant={invoice.status === 'paid' ? 'default' : 'outline'}
-                            className={invoice.status === 'paid' ? 'bg-green-600 hover:bg-green-600' : 'text-orange-600 border-orange-600'}
-                          >
-                            {invoice.status === 'paid' ? 'Payée' : 'En attente'}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">—</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-2">
                         {format(new Date(invoice.date), 'dd/MM/yyyy', { locale: fr })}
                       </td>
                       <td className="py-3 px-2">{invoice.clientName}</td>
@@ -264,6 +252,18 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                       </td>
                       <td className="py-3 px-2 text-right font-medium">
                         {invoice.totalAmount.toLocaleString('fr-FR')} F
+                      </td>
+                      <td className="py-3 px-2">
+                        {invoice.isProForma === false ? (
+                          <Badge 
+                            variant={invoice.status === 'paid' ? 'default' : 'outline'}
+                            className={invoice.status === 'paid' ? 'bg-green-600 hover:bg-green-600' : 'text-orange-600 border-orange-600'}
+                          >
+                            {invoice.status === 'paid' ? 'Payée' : 'En attente'}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
                       </td>
                       <td className="py-3 px-2 text-right">
                         <div className="flex justify-end gap-1">
