@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Eye, Trash2, FileText, FileCheck, Search, Edit2, Copy, CalendarIcon, X, Banknote } from 'lucide-react';
+import { Eye, Trash2, FileText, FileCheck, Search, Edit2, Copy, CalendarIcon, X, Banknote, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,9 +29,10 @@ interface InvoiceListProps {
   onDeleteInvoice: (id: string) => void;
   onUpdateInvoice: (id: string, data: Partial<Invoice>) => void;
   onCopyInvoice: (invoice: Invoice) => void;
+  onNewInvoice: () => void;
 }
 
-const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDeleteInvoice, onUpdateInvoice, onCopyInvoice }: InvoiceListProps) => {
+const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDeleteInvoice, onUpdateInvoice, onCopyInvoice, onNewInvoice }: InvoiceListProps) => {
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
   const [convertInvoice, setConvertInvoice] = useState<Invoice | null>(null);
   const [payInvoice, setPayInvoice] = useState<Invoice | null>(null);
@@ -143,7 +144,13 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
         <Card>
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <CardTitle>Factures ({invoices.length})</CardTitle>
+              <div className="flex items-center gap-3">
+                <CardTitle>Factures ({invoices.length})</CardTitle>
+                <Button onClick={onNewInvoice} size="sm" className="flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Nouvelle Facture
+                </Button>
+              </div>
               <div className="flex flex-col items-end gap-2">
                 <div className="flex gap-2 flex-wrap justify-end">
                   <Badge 

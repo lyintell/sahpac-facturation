@@ -1,4 +1,4 @@
-import { FileText, Users, Plus, LogOut } from 'lucide-react';
+import { FileText, Users, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -48,14 +48,6 @@ const Header = ({ activeTab, onTabChange }: HeaderProps) => {
               >
                 <Users className="w-4 h-4" />
                 Clients
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => onTabChange('new')}
-                className="flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Nouvelle Facture
               </Button>
             </nav>
             
