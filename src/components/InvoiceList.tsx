@@ -128,6 +128,15 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
   if (invoices.length === 0) {
     return (
       <Card className="animate-fade-in">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <CardTitle>Factures (0)</CardTitle>
+            <Button onClick={onNewInvoice} size="sm" className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Nouvelle Facture
+            </Button>
+          </div>
+        </CardHeader>
         <CardContent className="py-12 text-center">
           <FileText className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
           <p className="text-muted-foreground">
