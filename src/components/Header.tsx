@@ -1,5 +1,7 @@
-import { FileText, Users, Plus } from 'lucide-react';
+import { FileText, Users, Plus, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 import sahpacLogo from '@/assets/sahpac-logo.png';
 
 interface HeaderProps {
@@ -8,6 +10,13 @@ interface HeaderProps {
 }
 
 const Header = ({ activeTab, onTabChange }: HeaderProps) => {
+  const { signOut, user } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success('Déconnexion réussie');
+  };
+
   return (
     <header className="bg-primary text-primary-foreground shadow-elevated">
       <div className="container mx-auto px-4 py-4">
@@ -22,32 +31,47 @@ const Header = ({ activeTab, onTabChange }: HeaderProps) => {
             </div>
           </div>
           
-          <nav className="flex gap-2">
-            <Button
-              variant={activeTab === 'invoices' ? 'secondary' : 'ghost'}
-              onClick={() => onTabChange('invoices')}
-              className="flex items-center gap-2"
-            >
-              <FileText className="w-4 h-4" />
-              Factures
-            </Button>
-            <Button
-              variant={activeTab === 'clients' ? 'secondary' : 'ghost'}
-              onClick={() => onTabChange('clients')}
-              className="flex items-center gap-2"
-            >
-              <Users className="w-4 h-4" />
-              Clients
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => onTabChange('new')}
-              className="flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Nouvelle Facture
-            </Button>
-          </nav>
+          <div className="flex flex-col md:flex-row items-end md:items-center gap-2">
+            <nav className="flex gap-2">
+              <Button
+                variant={activeTab === 'invoices' ? 'secondary' : 'ghost'}
+                onClick={() => onTabChange('invoices')}
+                className="flex items-center gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                Factures
+              </Button>
+              <Button
+                variant={activeTab === 'clients' ? 'secondary' : 'ghost'}
+                onClick={() => onTabChange('clients')}
+                className="flex items-center gap-2"
+              >
+                <Users className="w-4 h-4" />
+                Clients
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => onTabChange('new')}
+                className="flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Nouvelle Facture
+              </Button>
+            </nav>
+            
+            <div className="flex items-center gap-2 border-l border-primary-foreground/20 pl-2 ml-2">
+              <span className="text-sm opacity-75 hidden md:inline">{user?.email}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSignOut}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="md:hidden">Déconnexion</span>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </header>
