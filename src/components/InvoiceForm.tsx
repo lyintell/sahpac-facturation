@@ -334,11 +334,20 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
           {selectedZones.length > 0 && (
             <div className="p-3 bg-secondary/50 rounded-lg">
               <p className="text-sm font-medium mb-2">Zones sélectionnées:</p>
-              <ul className="list-disc list-inside text-sm text-muted-foreground">
+              <div className="flex flex-wrap gap-2">
                 {selectedZones.map(zone => (
-                  <li key={zone.id}>{zone.name}</li>
+                  <div key={zone.id} className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
+                    <span>{zone.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedZones(selectedZones.filter(z => z.id !== zone.id))}
+                      className="ml-1 hover:bg-primary/20 rounded p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
         </CardContent>
