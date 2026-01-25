@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Plus, X, FileText, Save } from 'lucide-react';
+import { Plus, X, FileText, Save, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,8 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import { Client, Invoice, ZoneIntervention, INTERVENTION_TYPES, DEFAULT_TVA_RATE } from '@/types';
-
 interface InvoiceFormProps {
   clients: Client[];
   zones: ZoneIntervention[];
@@ -43,6 +47,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
   const [includeTva, setIncludeTva] = useState(true);
   const [isProForma, setIsProForma] = useState(true);
   const [observations, setObservations] = useState('');
+  const [invoiceDate, setInvoiceDate] = useState<Date>(new Date());
 
   // Load editing invoice data or preselected client
   useEffect(() => {
@@ -58,6 +63,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
       setIncludeTva(editingInvoice.tvaRate > 0);
       setIsProForma(editingInvoice.isProForma !== false);
       setObservations(editingInvoice.observations || '');
+      setInvoiceDate(new Date(editingInvoice.date));
     } else if (preselectedClientId) {
       setSelectedClientId(preselectedClientId);
     }
@@ -75,6 +81,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
     setIsProForma(true);
     setIncludeTva(true);
     setObservations('');
+    setInvoiceDate(new Date());
   };
 
   const selectedIntervention = INTERVENTION_TYPES.find(t => t.id === selectedInterventionId);
@@ -129,7 +136,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
     if (!client || !selectedIntervention) return;
 
     const invoiceData = {
-      date: editingInvoice ? new Date(editingInvoice.date) : new Date(),
+      date: invoiceDate,
       clientId: client.id,
       clientName: client.name,
       workDescription,
@@ -192,24 +199,53 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
           <CardTitle>Informations Client</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Client</Label>
-            <div className="flex gap-2">
-              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Sélectionner un client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map(client => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button variant="outline" onClick={() => setShowNewClient(!showNewClient)}>
-                <Plus className="w-4 h-4" />
-              </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Client</Label>
+              <div className="flex gap-2">
+                <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Sélectionner un client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map(client => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" onClick={() => setShowNewClient(!showNewClient)}>
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Date de la facture</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !invoiceDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {invoiceDate ? format(invoiceDate, "d MMMM yyyy", { locale: fr }) : <span>Choisir une date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={invoiceDate}
+                    onSelect={(date) => date && setInvoiceDate(date)}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
