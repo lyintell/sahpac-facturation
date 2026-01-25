@@ -37,6 +37,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
   const [payInvoice, setPayInvoice] = useState<Invoice | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'proforma' | 'definitive'>('all');
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'pending'>('all');
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
 
@@ -48,6 +49,13 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
       filtered = filtered.filter(inv => inv.isProForma !== false);
     } else if (typeFilter === 'definitive') {
       filtered = filtered.filter(inv => inv.isProForma === false);
+    }
+    
+    // Filter by payment status (only applies to definitive invoices)
+    if (paymentFilter === 'paid') {
+      filtered = filtered.filter(inv => inv.isProForma === false && inv.status === 'paid');
+    } else if (paymentFilter === 'pending') {
+      filtered = filtered.filter(inv => inv.isProForma === false && inv.status !== 'paid');
     }
     
     // Filter by date range
@@ -71,7 +79,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
     }
     
     return filtered;
-  }, [invoices, clients, searchQuery, typeFilter, dateFrom, dateTo]);
+  }, [invoices, clients, searchQuery, typeFilter, paymentFilter, dateFrom, dateTo]);
 
   const clearDateFilter = () => {
     setDateFrom(undefined);
@@ -80,9 +88,19 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
 
   const proFormaCount = useMemo(() => invoices.filter(inv => inv.isProForma !== false).length, [invoices]);
   const definitiveCount = useMemo(() => invoices.filter(inv => inv.isProForma === false).length, [invoices]);
+  const paidCount = useMemo(() => invoices.filter(inv => inv.isProForma === false && inv.status === 'paid').length, [invoices]);
+  const pendingCount = useMemo(() => invoices.filter(inv => inv.isProForma === false && inv.status !== 'paid').length, [invoices]);
 
   const toggleTypeFilter = (type: 'proforma' | 'definitive') => {
     setTypeFilter(prev => prev === type ? 'all' : type);
+    // Reset payment filter when changing type filter
+    if (type === 'proforma') {
+      setPaymentFilter('all');
+    }
+  };
+
+  const togglePaymentFilter = (status: 'paid' | 'pending') => {
+    setPaymentFilter(prev => prev === status ? 'all' : status);
   };
 
   const handleConfirmDelete = () => {
@@ -127,7 +145,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
               <CardTitle>Factures ({invoices.length})</CardTitle>
               <div className="flex flex-col items-end gap-2">
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap justify-end">
                   <Badge 
                     variant={typeFilter === 'proforma' ? 'default' : 'secondary'} 
                     className={`cursor-pointer hover:opacity-80 transition-opacity ${typeFilter === 'proforma' ? 'bg-gray-700 hover:bg-gray-700' : ''}`}
@@ -141,6 +159,21 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                     onClick={() => toggleTypeFilter('definitive')}
                   >
                     {definitiveCount} Définitives
+                  </Badge>
+                  <span className="text-muted-foreground">|</span>
+                  <Badge 
+                    variant={paymentFilter === 'paid' ? 'default' : 'outline'} 
+                    className={`cursor-pointer hover:opacity-80 transition-opacity ${paymentFilter === 'paid' ? 'bg-green-600 hover:bg-green-600' : 'text-green-600 border-green-600'}`}
+                    onClick={() => togglePaymentFilter('paid')}
+                  >
+                    {paidCount} Payées
+                  </Badge>
+                  <Badge 
+                    variant={paymentFilter === 'pending' ? 'default' : 'outline'} 
+                    className={`cursor-pointer hover:opacity-80 transition-opacity ${paymentFilter === 'pending' ? 'bg-orange-600 hover:bg-orange-600' : 'text-orange-600 border-orange-600'}`}
+                    onClick={() => togglePaymentFilter('pending')}
+                  >
+                    {pendingCount} En attente
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
