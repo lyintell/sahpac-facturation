@@ -51,8 +51,11 @@ export type Database = {
           client_name: string
           created_at: string
           date: string
+          findings: string | null
+          frequency: string | null
           id: string
           include_tva: boolean
+          intervention_description: string | null
           intervention_type_id: string
           intervention_type_name: string
           invoice_number: string
@@ -67,6 +70,7 @@ export type Database = {
           tva_rate: number
           updated_at: string
           user_id: string
+          work_description: string | null
           zone_ids: string[] | null
           zone_names: string[] | null
         }
@@ -76,8 +80,11 @@ export type Database = {
           client_name: string
           created_at?: string
           date?: string
+          findings?: string | null
+          frequency?: string | null
           id?: string
           include_tva?: boolean
+          intervention_description?: string | null
           intervention_type_id: string
           intervention_type_name: string
           invoice_number: string
@@ -92,6 +99,7 @@ export type Database = {
           tva_rate?: number
           updated_at?: string
           user_id: string
+          work_description?: string | null
           zone_ids?: string[] | null
           zone_names?: string[] | null
         }
@@ -101,8 +109,11 @@ export type Database = {
           client_name?: string
           created_at?: string
           date?: string
+          findings?: string | null
+          frequency?: string | null
           id?: string
           include_tva?: boolean
+          intervention_description?: string | null
           intervention_type_id?: string
           intervention_type_name?: string
           invoice_number?: string
@@ -117,6 +128,7 @@ export type Database = {
           tva_rate?: number
           updated_at?: string
           user_id?: string
+          work_description?: string | null
           zone_ids?: string[] | null
           zone_names?: string[] | null
         }

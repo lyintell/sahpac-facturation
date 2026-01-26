@@ -15,6 +15,10 @@ type DbInvoiceRow = {
   date: string;
   intervention_type_id: string;
   intervention_type_name: string;
+  work_description: string | null;
+  intervention_description: string | null;
+  frequency: string | null;
+  findings: string | null;
   zone_ids: string[] | null;
   zone_names: string[] | null;
   items: unknown;
@@ -46,10 +50,10 @@ const mapDbToInvoice = (db: DbInvoiceRow): Invoice => {
     date: new Date(db.date),
     interventionTypeId: db.intervention_type_id,
     interventionTypeName: db.intervention_type_name,
-    interventionDescription: '',
-    workDescription: '',
-    frequency: '',
-    findings: '',
+    interventionDescription: db.intervention_description || '',
+    workDescription: db.work_description || '',
+    frequency: db.frequency || '',
+    findings: db.findings || '',
     zones,
     zoneIds: db.zone_ids || [],
     zoneNames: db.zone_names || [],
@@ -119,7 +123,7 @@ export const useInvoices = () => {
     const zoneIds = invoiceData.zoneIds || invoiceData.zones?.map(z => z.id) || [];
     const zoneNames = invoiceData.zoneNames || invoiceData.zones?.map(z => z.name) || [];
     
-    const dbData: TablesInsert<'invoices'> = {
+    const dbData: TablesInsert<'invoices'> & { work_description?: string | null; intervention_description?: string | null; frequency?: string | null; findings?: string | null } = {
       user_id: user.id,
       invoice_number: invoiceNumber,
       client_id: invoiceData.clientId,
@@ -128,6 +132,10 @@ export const useInvoices = () => {
       date: invoiceData.date instanceof Date ? invoiceData.date.toISOString() : String(invoiceData.date),
       intervention_type_id: invoiceData.interventionTypeId,
       intervention_type_name: invoiceData.interventionTypeName,
+      work_description: invoiceData.workDescription || null,
+      intervention_description: invoiceData.interventionDescription || null,
+      frequency: invoiceData.frequency || null,
+      findings: invoiceData.findings || null,
       zone_ids: zoneIds,
       zone_names: zoneNames,
       items: (invoiceData.items || []) as unknown as TablesInsert<'invoices'>['items'],
@@ -177,6 +185,10 @@ export const useInvoices = () => {
     if (invoiceData.date !== undefined) dbData.date = invoiceData.date instanceof Date ? invoiceData.date.toISOString() : invoiceData.date;
     if (invoiceData.interventionTypeId !== undefined) dbData.intervention_type_id = invoiceData.interventionTypeId;
     if (invoiceData.interventionTypeName !== undefined) dbData.intervention_type_name = invoiceData.interventionTypeName;
+    if (invoiceData.workDescription !== undefined) dbData.work_description = invoiceData.workDescription;
+    if (invoiceData.interventionDescription !== undefined) dbData.intervention_description = invoiceData.interventionDescription;
+    if (invoiceData.frequency !== undefined) dbData.frequency = invoiceData.frequency;
+    if (invoiceData.findings !== undefined) dbData.findings = invoiceData.findings;
     if (invoiceData.zoneIds !== undefined) dbData.zone_ids = invoiceData.zoneIds;
     if (invoiceData.zoneNames !== undefined) dbData.zone_names = invoiceData.zoneNames;
     if (invoiceData.zones !== undefined) {
@@ -243,7 +255,7 @@ export const useInvoices = () => {
     const zoneIds = invoice.zoneIds || invoice.zones?.map(z => z.id) || [];
     const zoneNames = invoice.zoneNames || invoice.zones?.map(z => z.name) || [];
     
-    const dbData: TablesInsert<'invoices'> = {
+    const dbData: TablesInsert<'invoices'> & { work_description?: string | null; intervention_description?: string | null; frequency?: string | null; findings?: string | null } = {
       user_id: user.id,
       invoice_number: invoiceNumber,
       client_id: invoice.clientId,
@@ -252,6 +264,10 @@ export const useInvoices = () => {
       date: new Date().toISOString(),
       intervention_type_id: invoice.interventionTypeId,
       intervention_type_name: invoice.interventionTypeName,
+      work_description: invoice.workDescription || null,
+      intervention_description: invoice.interventionDescription || null,
+      frequency: invoice.frequency || null,
+      findings: invoice.findings || null,
       zone_ids: zoneIds,
       zone_names: zoneNames,
       items: (invoice.items || []) as unknown as TablesInsert<'invoices'>['items'],
