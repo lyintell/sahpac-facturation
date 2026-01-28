@@ -44,7 +44,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
   
   const [amountHT, setAmountHT] = useState('');
   const [tvaRate] = useState(DEFAULT_TVA_RATE);
-  const [includeTva, setIncludeTva] = useState(true);
+  const [includeTva, setIncludeTva] = useState(false);
   const [isProForma, setIsProForma] = useState(true);
   const [observations, setObservations] = useState('');
   const [invoiceDate, setInvoiceDate] = useState<Date>(new Date());
