@@ -379,7 +379,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
                       onClick={handleAddZone}
                     >
                       <Plus className="w-4 h-4" />
-                      Créer "{newZoneName.trim()}"
+                      Ajouter "{newZoneName.trim()}"
                     </button>
                   )}
                 </div>
