@@ -206,7 +206,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           {invoice.observations && (
             <div className="mb-6">
               <p>
-                <span className="font-semibold text-primary">OBSERVATIONS</span> : {invoice.observations}
+                <span className="font-semibold text-primary underline">OBSERVATIONS</span> : {invoice.observations}
               </p>
             </div>
           )}
