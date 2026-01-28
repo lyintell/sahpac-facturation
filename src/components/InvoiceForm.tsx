@@ -339,31 +339,76 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
           <CardTitle>Zones d'Intervention</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {zones.map(zone => (
-              <Button
-                key={zone.id}
-                variant={selectedZones.find(z => z.id === zone.id) ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => toggleZone(zone)}
-              >
-                {zone.name}
-              </Button>
-            ))}
+          <div className="space-y-2">
+            <Label>Rechercher ou ajouter une zone</Label>
+            <div className="relative">
+              <Input
+                placeholder="Tapez pour rechercher ou ajouter une zone..."
+                value={newZoneName}
+                onChange={(e) => setNewZoneName(e.target.value)}
+                className="w-full"
+              />
+              {newZoneName.trim() && (
+                <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-48 overflow-auto">
+                  {zones
+                    .filter(zone => 
+                      zone.name.toLowerCase().startsWith(newZoneName.toLowerCase()) ||
+                      zone.name.toLowerCase().includes(newZoneName.toLowerCase())
+                    )
+                    .filter(zone => !selectedZones.find(z => z.id === zone.id))
+                    .map(zone => (
+                      <button
+                        key={zone.id}
+                        type="button"
+                        className="w-full px-3 py-2 text-left hover:bg-secondary transition-colors text-sm"
+                        onClick={() => {
+                          toggleZone(zone);
+                          setNewZoneName('');
+                        }}
+                      >
+                        {zone.name}
+                      </button>
+                    ))
+                  }
+                  {!zones.some(zone => 
+                    zone.name.toLowerCase() === newZoneName.trim().toLowerCase()
+                  ) && (
+                    <button
+                      type="button"
+                      className="w-full px-3 py-2 text-left hover:bg-secondary transition-colors text-sm flex items-center gap-2 text-primary font-medium border-t border-border"
+                      onClick={handleAddZone}
+                    >
+                      <Plus className="w-4 h-4" />
+                      Créer "{newZoneName.trim()}"
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="flex gap-2">
-            <Input
-              placeholder="Ajouter une nouvelle zone"
-              value={newZoneName}
-              onChange={(e) => setNewZoneName(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleAddZone} disabled={!newZoneName.trim()}>
-              <Plus className="w-4 h-4 mr-2" />
-              Ajouter
-            </Button>
-          </div>
+          {zones.length > 0 && !newZoneName.trim() && (
+            <div className="flex flex-wrap gap-2">
+              {zones
+                .filter(zone => !selectedZones.find(z => z.id === zone.id))
+                .slice(0, 8)
+                .map(zone => (
+                  <Button
+                    key={zone.id}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleZone(zone)}
+                  >
+                    {zone.name}
+                  </Button>
+                ))}
+              {zones.filter(zone => !selectedZones.find(z => z.id === zone.id)).length > 8 && (
+                <span className="text-sm text-muted-foreground self-center">
+                  +{zones.filter(zone => !selectedZones.find(z => z.id === zone.id)).length - 8} autres...
+                </span>
+              )}
+            </div>
+          )}
 
           {selectedZones.length > 0 && (
             <div className="p-3 bg-secondary/50 rounded-lg">
