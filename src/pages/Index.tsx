@@ -48,7 +48,7 @@ const Index = () => {
   }, [updateClient]);
 
   const handleAddZone = useCallback(async (zone: Omit<ZoneIntervention, 'id'>) => {
-    await addZone(zone);
+    return await addZone(zone);
   }, [addZone]);
 
   const handleCreateInvoice = useCallback(async (invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => {
