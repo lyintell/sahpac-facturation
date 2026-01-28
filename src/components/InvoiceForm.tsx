@@ -19,7 +19,7 @@ interface InvoiceFormProps {
   editingInvoice?: Invoice | null;
   preselectedClientId?: string | null;
   onAddClient: (client: Omit<Client, 'id' | 'createdAt'>) => void;
-  onAddZone: (zone: Omit<ZoneIntervention, 'id'>) => void;
+  onAddZone: (zone: Omit<ZoneIntervention, 'id'>) => Promise<ZoneIntervention | null>;
   onCreateInvoice: (invoice: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => void;
   onUpdateInvoice?: (id: string, data: Partial<Invoice>) => void;
   onCancelEdit?: () => void;
@@ -111,14 +111,12 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
     }
   };
 
-  const handleAddZone = () => {
+  const handleAddZone = async () => {
     if (newZoneName.trim()) {
-      const newZone: ZoneIntervention = {
-        id: Date.now().toString(),
-        name: newZoneName.trim()
-      };
-      onAddZone(newZone);
-      setSelectedZones([...selectedZones, newZone]);
+      const savedZone = await onAddZone({ name: newZoneName.trim() });
+      if (savedZone) {
+        setSelectedZones([...selectedZones, { id: savedZone.id, name: savedZone.name }]);
+      }
       setNewZoneName('');
     }
   };
