@@ -112,10 +112,11 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
 
   return (
     <div
-      className="print-container fixed inset-0 bg-foreground/50 flex items-center justify-center p-4 z-50 overflow-auto"
+      className="print-container fixed inset-0 bg-foreground/50 z-50 overflow-auto"
       onClick={onClose}
     >
-      <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
+      <div className="min-h-full flex flex-col items-center py-4 px-4">
+        <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
         <div className="no-print flex justify-end gap-2 mb-4">
           <Button onClick={handlePrint} variant="secondary" className="bg-warning hover:bg-warning/90 text-warning-foreground">
             <Printer className="w-4 h-4 mr-2" />
@@ -259,6 +260,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
             </p>
             <p>sahpac1_sarl@yahoo.fr : Bamako - Mali</p>
           </div>
+        </div>
         </div>
       </div>
     </div>
