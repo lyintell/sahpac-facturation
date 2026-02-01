@@ -1,8 +1,11 @@
+import { useRef, useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Printer, X } from "lucide-react";
+import { Printer, X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Invoice } from "@/types";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface InvoicePreviewProps {
   invoice: Invoice;
@@ -103,8 +106,47 @@ const numberToWords = (num: number): string => {
 };
 
 const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
+  const invoiceRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleExportPDF = async () => {
+    if (!invoiceRef.current) return;
+    
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(invoiceRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 0;
+      
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.save(`${invoice.invoiceNumber}.pdf`);
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const formattedDate = format(new Date(invoice.date), "d MMMM yyyy", { locale: fr });
@@ -118,6 +160,15 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
       <div className="min-h-full flex flex-col items-center py-4 px-4">
         <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
         <div className="no-print flex justify-end gap-2 mb-4">
+          <Button 
+            onClick={handleExportPDF} 
+            variant="secondary" 
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            disabled={isExporting}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {isExporting ? 'Export...' : 'Exporter PDF'}
+          </Button>
           <Button onClick={handlePrint} variant="secondary" className="bg-warning hover:bg-warning/90 text-warning-foreground">
             <Printer className="w-4 h-4 mr-2" />
             Imprimer
@@ -128,7 +179,7 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
           </Button>
         </div>
 
-        <div className="invoice-paper print-paper bg-card relative overflow-hidden">
+        <div ref={invoiceRef} className="invoice-paper print-paper bg-card relative overflow-hidden">
           {/* PAYÉ Watermark */}
           {invoice.status === 'paid' && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
