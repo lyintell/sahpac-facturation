@@ -122,9 +122,27 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
 
   const handleConfirmPay = () => {
     if (payInvoice) {
-      onUpdateInvoice(payInvoice.id, { status: 'paid', paidAt: new Date() });
+      const amount = parseFloat(paymentAmount) || 0;
+      if (amount <= 0) return;
+      const totalPaid = (payInvoice.paidAmount || 0) + amount;
+      const remaining = payInvoice.totalAmount - totalPaid;
+      
+      if (remaining <= 0) {
+        // Fully paid
+        onUpdateInvoice(payInvoice.id, { status: 'paid', paidAmount: payInvoice.totalAmount, paidAt: new Date() });
+      } else {
+        // Partial payment
+        onUpdateInvoice(payInvoice.id, { paidAmount: totalPaid });
+      }
       setPayInvoice(null);
+      setPaymentAmount('');
     }
+  };
+
+  const openPayDialog = (invoice: Invoice) => {
+    setPayInvoice(invoice);
+    const remaining = invoice.totalAmount - (invoice.paidAmount || 0);
+    setPaymentAmount(String(remaining));
   };
 
   if (invoices.length === 0) {
