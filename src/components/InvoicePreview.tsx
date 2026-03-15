@@ -370,7 +370,7 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
             <AlertDialogDescription asChild>
               <div className="space-y-3">
                 <p>
-                  Facture <strong>{invoice.invoiceNumber}</strong> — Total: <strong>{invoice.totalAmount.toLocaleString('fr-FR')} F</strong>
+                  Facture <strong>{invoice.invoiceNumber}</strong> — Total: <strong>Facture <strong>{invoice.invoiceNumber}</strong> — Total: <strong>{invoice.totalAmount.toLocaleString('fr-FR')} FCFA</strong></strong>
                 </p>
                 {(invoice.paidAmount || 0) > 0 && (
                   <p>Déjà payé: <strong>{(invoice.paidAmount || 0).toLocaleString('fr-FR')} F</strong> — Reste: <strong>{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString('fr-FR')} F</strong></p>
