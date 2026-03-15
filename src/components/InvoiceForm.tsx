@@ -89,7 +89,7 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
     setInvoiceDate(new Date());
   };
 
-  const selectedIntervention = INTERVENTION_TYPES.find(t => t.id === selectedInterventionId);
+  const selectedIntervention = interventionTypes.find(t => t.id === selectedInterventionId);
   
   const tvaAmount = useMemo(() => {
     if (!includeTva) return 0;
