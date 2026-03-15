@@ -366,7 +366,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                                 Partiel
                               </Badge>
                               <span className="text-xs text-muted-foreground">
-                                {(invoice.paidAmount || 0).toLocaleString('fr-FR')} / {invoice.totalAmount.toLocaleString('fr-FR')} F
+                                {(invoice.paidAmount || 0).toLocaleString('fr-FR')} / {invoice.totalAmount.toLocaleString('fr-FR')} FCFA
                               </span>
                             </div>
                           ) : (
