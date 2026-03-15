@@ -554,7 +554,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
             <AlertDialogDescription asChild>
               <div className="space-y-3">
                 <p>
-                  Facture <strong>{payInvoice?.invoiceNumber}</strong> — Total: <strong>{payInvoice?.totalAmount.toLocaleString('fr-FR')} F</strong>
+                  Facture <strong>{payInvoice?.invoiceNumber}</strong> — Facture <strong>{payInvoice?.invoiceNumber}</strong> — Total: <strong>{payInvoice?.totalAmount.toLocaleString('fr-FR')} FCFA</strong>
                 </p>
                 {(payInvoice?.paidAmount || 0) > 0 && (
                   <p>Déjà payé: <strong>{(payInvoice?.paidAmount || 0).toLocaleString('fr-FR')} F</strong> — Reste: <strong>{((payInvoice?.totalAmount || 0) - (payInvoice?.paidAmount || 0)).toLocaleString('fr-FR')} F</strong></p>
