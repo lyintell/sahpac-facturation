@@ -172,9 +172,9 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
       className="print-container fixed inset-0 bg-foreground/50 z-50 overflow-auto"
       onClick={onClose}
     >
-      <div className="min-h-full flex flex-col items-center py-4 px-4">
+      <div className="min-h-full flex flex-col items-center py-2 sm:py-4 px-2 sm:px-4">
         <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
-        <div className="no-print flex justify-end gap-2 mb-4">
+        <div className="no-print flex flex-wrap justify-end gap-1.5 sm:gap-2 mb-3 sm:mb-4">
           {!invoice.isProForma && invoice.status !== 'paid' && onUpdateInvoice && (
             <Button
               onClick={() => {
@@ -183,28 +183,32 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
                 setShowPayDialog(true);
               }}
               variant="secondary"
-              className="bg-green-600 hover:bg-green-700 text-white"
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm"
             >
-              <Banknote className="w-4 h-4 mr-2" />
-              Enregistrer un paiement
+              <Banknote className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Enregistrer un paiement</span>
+              <span className="sm:hidden">Payer</span>
             </Button>
           )}
           <Button 
             onClick={handleExportPDF} 
-            variant="secondary" 
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            variant="secondary"
+            size="sm"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs sm:text-sm"
             disabled={isExporting}
           >
-            <Download className="w-4 h-4 mr-2" />
-            {isExporting ? 'Export...' : 'Exporter PDF'}
+            <Download className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">{isExporting ? 'Export...' : 'Exporter PDF'}</span>
+            <span className="sm:hidden">PDF</span>
           </Button>
-          <Button onClick={handlePrint} variant="secondary" className="bg-warning hover:bg-warning/90 text-warning-foreground">
-            <Printer className="w-4 h-4 mr-2" />
-            Imprimer
+          <Button onClick={handlePrint} variant="secondary" size="sm" className="bg-warning hover:bg-warning/90 text-warning-foreground text-xs sm:text-sm">
+            <Printer className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Imprimer</span>
           </Button>
-          <Button variant="outline" onClick={onClose} className="bg-card">
-            <X className="w-4 h-4 mr-2" />
-            Fermer
+          <Button variant="outline" onClick={onClose} size="sm" className="bg-card text-xs sm:text-sm">
+            <X className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Fermer</span>
           </Button>
         </div>
 

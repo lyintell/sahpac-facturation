@@ -104,7 +104,7 @@ const Index = () => {
     <div className="min-h-screen bg-background print-scope">
       <Header activeTab={activeTab} onTabChange={setActiveTab} />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
         {activeTab === 'invoices' && (
           <InvoiceList
             invoices={invoices}

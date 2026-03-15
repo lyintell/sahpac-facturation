@@ -120,7 +120,7 @@
 
 @layer components {
   .invoice-paper {
-    @apply bg-card shadow-lg rounded-lg p-8 max-w-4xl mx-auto;
+    @apply bg-card shadow-lg rounded-lg p-4 sm:p-8 max-w-4xl mx-auto;
     font-family: 'Inter', sans-serif;
   }
 
