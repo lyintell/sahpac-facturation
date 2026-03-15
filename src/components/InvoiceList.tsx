@@ -94,6 +94,14 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
   const paidCount = useMemo(() => invoices.filter(inv => inv.isProForma === false && inv.status === 'paid').length, [invoices]);
   const pendingCount = useMemo(() => invoices.filter(inv => inv.isProForma === false && inv.status !== 'paid').length, [invoices]);
 
+  const financialStats = useMemo(() => {
+    const definitiveInvoices = invoices.filter(inv => inv.isProForma === false);
+    const totalAmount = definitiveInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+    const totalPaid = definitiveInvoices.reduce((sum, inv) => sum + (inv.paidAmount || 0), 0);
+    const totalRemaining = totalAmount - totalPaid;
+    return { totalAmount, totalPaid, totalRemaining };
+  }, [invoices]);
+
   const toggleTypeFilter = (type: 'proforma' | 'definitive') => {
     setTypeFilter(prev => prev === type ? 'all' : type);
     // Reset payment filter when changing type filter
