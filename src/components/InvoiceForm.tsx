@@ -12,14 +12,16 @@ import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { Client, Invoice, ZoneIntervention, INTERVENTION_TYPES, DEFAULT_TVA_RATE } from '@/types';
+import { Client, Invoice, ZoneIntervention, InterventionType, DEFAULT_TVA_RATE } from '@/types';
 interface InvoiceFormProps {
   clients: Client[];
   zones: ZoneIntervention[];
+  interventionTypes: InterventionType[];
   editingInvoice?: Invoice | null;
   preselectedClientId?: string | null;
   onAddClient: (client: Omit<Client, 'id' | 'createdAt'>) => void;
   onAddZone: (zone: Omit<ZoneIntervention, 'id'>) => Promise<ZoneIntervention | null>;
+  onAddInterventionType: (type: Omit<InterventionType, 'id'>) => Promise<InterventionType | null>;
   onCreateInvoice: (invoice: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => void;
   onUpdateInvoice?: (id: string, data: Partial<Invoice>) => void;
   onCancelEdit?: () => void;
