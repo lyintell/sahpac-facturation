@@ -71,5 +71,48 @@ export const useInterventionTypes = () => {
     [user]
   );
 
-  return { interventionTypes, loading, addType };
+  const updateType = useCallback(
+    async (id: string, data: Partial<InterventionType>) => {
+      const { error } = await supabase
+        .from('intervention_types')
+        .update({
+          ...(data.name !== undefined && { name: data.name }),
+          ...(data.description !== undefined && { description: data.description }),
+          ...(data.standardPrice !== undefined && { standard_price: data.standardPrice }),
+        })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error updating intervention type:', error);
+        toast.error("Erreur lors de la mise à jour");
+        return;
+      }
+
+      setInterventionTypes((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, ...data } : t))
+      );
+    },
+    []
+  );
+
+  const deleteType = useCallback(
+    async (id: string) => {
+      const { error } = await supabase
+        .from('intervention_types')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting intervention type:', error);
+        toast.error("Erreur lors de la suppression");
+        return;
+      }
+
+      setInterventionTypes((prev) => prev.filter((t) => t.id !== id));
+      toast.success("Type d'intervention supprimé");
+    },
+    []
+  );
+
+  return { interventionTypes, loading, addType, updateType, deleteType };
 };

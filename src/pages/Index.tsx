@@ -4,6 +4,7 @@ import ClientManager from '@/components/ClientManager';
 import InvoiceForm from '@/components/InvoiceForm';
 import InvoiceList from '@/components/InvoiceList';
 import InvoicePreview from '@/components/InvoicePreview';
+import AdminPanel from '@/components/AdminPanel';
 import { useClients } from '@/hooks/useClients';
 import { useInvoices } from '@/hooks/useInvoices';
 import { useZones } from '@/hooks/useZones';
@@ -11,11 +12,11 @@ import { useInterventionTypes } from '@/hooks/useInterventionTypes';
 import { Invoice, ZoneIntervention, InterventionType, Client } from '@/types';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<'invoices' | 'clients' | 'new'>('invoices');
+  const [activeTab, setActiveTab] = useState<'invoices' | 'clients' | 'new' | 'admin'>('invoices');
   const { clients, loading: clientsLoading, addClient, updateClient, deleteClient } = useClients();
   const { invoices, loading: invoicesLoading, createInvoice, updateInvoice, deleteInvoice, copyInvoice } = useInvoices();
-  const { zones, loading: zonesLoading, addZone } = useZones();
-  const { interventionTypes, loading: interventionTypesLoading, addType: addInterventionType } = useInterventionTypes();
+  const { zones, loading: zonesLoading, addZone, updateZone, deleteZone } = useZones();
+  const { interventionTypes, loading: interventionTypesLoading, addType: addInterventionType, updateType: updateInterventionType, deleteType: deleteInterventionType } = useInterventionTypes();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [preselectedClientId, setPreselectedClientId] = useState<string | null>(null);
@@ -142,6 +143,20 @@ const Index = () => {
             onCreateInvoice={handleCreateInvoice}
             onUpdateInvoice={handleUpdateInvoice}
             onCancelEdit={handleCancelEdit}
+          />
+        )}
+
+        {activeTab === 'admin' && (
+          <AdminPanel
+            interventionTypes={interventionTypes}
+            zones={zonesData}
+            onAddInterventionType={addInterventionType}
+            onUpdateInterventionType={async (id, data) => await updateInterventionType(id, data)}
+            onDeleteInterventionType={async (id) => await deleteInterventionType(id)}
+            onAddZone={handleAddZone}
+            onUpdateZone={async (id, data) => await updateZone(id, data)}
+            onDeleteZone={async (id) => await deleteZone(id)}
+            onClose={() => setActiveTab('invoices')}
           />
         )}
       </main>

@@ -1,12 +1,12 @@
-import { FileText, Users, LogOut } from 'lucide-react';
+import { FileText, Users, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import sahpacLogo from '@/assets/sahpac-logo.png';
 
 interface HeaderProps {
-  activeTab: 'invoices' | 'clients' | 'new';
-  onTabChange: (tab: 'invoices' | 'clients' | 'new') => void;
+  activeTab: 'invoices' | 'clients' | 'new' | 'admin';
+  onTabChange: (tab: 'invoices' | 'clients' | 'new' | 'admin') => void;
 }
 
 const Header = ({ activeTab, onTabChange }: HeaderProps) => {
@@ -54,13 +54,20 @@ const Header = ({ activeTab, onTabChange }: HeaderProps) => {
             <div className="flex items-center gap-2 border-l border-primary-foreground/20 pl-2 ml-2">
               <span className="text-sm opacity-75 hidden md:inline">{user?.email}</span>
               <Button
+                variant={activeTab === 'admin' ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={() => onTabChange('admin')}
+                title="Administration"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+              <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={handleSignOut}
-                className="flex items-center gap-2"
+                title="Déconnexion"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="md:hidden">Déconnexion</span>
               </Button>
             </div>
           </div>
