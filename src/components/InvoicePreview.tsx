@@ -307,7 +307,7 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
                 <div className="flex items-baseline">
                   <span className="shrink-0">TVA {invoice.tvaRate}%</span>
                   <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
-                  <span className="font-medium shrink-0">{invoice.tvaAmount.toLocaleString("fr-FR")} F</span>
+                  <span className="font-medium shrink-0"><span className="font-medium shrink-0">{invoice.tvaAmount.toLocaleString("fr-FR")} FCFA</span></span>
                 </div>
               )}
               <div className="flex items-baseline font-bold text-lg pt-2">
