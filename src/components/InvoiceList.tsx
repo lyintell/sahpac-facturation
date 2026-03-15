@@ -178,6 +178,28 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
   return (
     <>
       <div className="space-y-4 animate-fade-in">
+        {/* Financial summary */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">Total Facturé</p>
+              <p className="text-sm sm:text-xl font-bold text-blue-700 dark:text-blue-300">{financialStats.totalAmount.toLocaleString('fr-FR')} F</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">Total Payé</p>
+              <p className="text-sm sm:text-xl font-bold text-green-700 dark:text-green-300">{financialStats.totalPaid.toLocaleString('fr-FR')} F</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">Reliquats</p>
+              <p className="text-sm sm:text-xl font-bold text-orange-700 dark:text-orange-300">{financialStats.totalRemaining.toLocaleString('fr-FR')} F</p>
+            </CardContent>
+          </Card>
+        </div>
+
         <Card>
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
