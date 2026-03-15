@@ -449,17 +449,35 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!payInvoice} onOpenChange={(open) => !open && setPayInvoice(null)}>
+      <AlertDialog open={!!payInvoice} onOpenChange={(open) => { if (!open) { setPayInvoice(null); setPaymentAmount(''); } }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Marquer comme payée</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir marquer la facture <strong>{payInvoice?.invoiceNumber}</strong> comme payée ?
+            <AlertDialogTitle>Enregistrer un paiement</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  Facture <strong>{payInvoice?.invoiceNumber}</strong> — Total: <strong>{payInvoice?.totalAmount.toLocaleString('fr-FR')} F</strong>
+                </p>
+                {(payInvoice?.paidAmount || 0) > 0 && (
+                  <p>Déjà payé: <strong>{(payInvoice?.paidAmount || 0).toLocaleString('fr-FR')} F</strong> — Reste: <strong>{((payInvoice?.totalAmount || 0) - (payInvoice?.paidAmount || 0)).toLocaleString('fr-FR')} F</strong></p>
+                )}
+                <div className="space-y-1.5">
+                  <Label htmlFor="payment-amount">Montant du paiement (F)</Label>
+                  <Input
+                    id="payment-amount"
+                    type="number"
+                    min="0"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    placeholder="Montant..."
+                  />
+                </div>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmPay} className="bg-green-600 hover:bg-green-700">
+            <AlertDialogAction onClick={handleConfirmPay} className="bg-green-600 hover:bg-green-700" disabled={!paymentAmount || parseFloat(paymentAmount) <= 0}>
               Confirmer le paiement
             </AlertDialogAction>
           </AlertDialogFooter>
