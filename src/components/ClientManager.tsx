@@ -83,6 +83,13 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
     return invoices.filter(inv => inv.clientId === clientId).length;
   };
 
+  const getClientFinancials = (clientId: string) => {
+    const clientDefInvoices = invoices.filter(inv => inv.clientId === clientId && inv.isProForma === false);
+    const total = clientDefInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+    const paid = clientDefInvoices.reduce((sum, inv) => sum + (inv.paidAmount || 0), 0);
+    return { total, paid, remaining: total - paid };
+  };
+
   const filteredClients = useMemo(() => {
     if (!searchQuery.trim()) return clients;
     const query = searchQuery.toLowerCase();
