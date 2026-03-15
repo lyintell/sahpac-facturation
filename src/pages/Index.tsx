@@ -89,7 +89,7 @@ const Index = () => {
     createdAt: c.created_at ? new Date(c.created_at) : new Date(),
   }));
 
-  const isLoading = clientsLoading || invoicesLoading || zonesLoading;
+  const isLoading = clientsLoading || invoicesLoading || zonesLoading || interventionTypesLoading;
 
   if (isLoading) {
     return (
