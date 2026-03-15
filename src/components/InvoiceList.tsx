@@ -362,8 +362,8 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => setPayInvoice(invoice)}
-                              title="Marquer comme payée"
+                              onClick={() => openPayDialog(invoice)}
+                              title="Enregistrer un paiement"
                               className="text-green-600 hover:text-green-700"
                             >
                               <Banknote className="w-4 h-4" />
