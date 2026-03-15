@@ -175,6 +175,20 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
       <div className="min-h-full flex flex-col items-center py-4 px-4">
         <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
         <div className="no-print flex justify-end gap-2 mb-4">
+          {!invoice.isProForma && invoice.status !== 'paid' && onUpdateInvoice && (
+            <Button
+              onClick={() => {
+                const remaining = invoice.totalAmount - (invoice.paidAmount || 0);
+                setPaymentAmount(String(remaining));
+                setShowPayDialog(true);
+              }}
+              variant="secondary"
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Banknote className="w-4 h-4 mr-2" />
+              Enregistrer un paiement
+            </Button>
+          )}
           <Button 
             onClick={handleExportPDF} 
             variant="secondary" 
