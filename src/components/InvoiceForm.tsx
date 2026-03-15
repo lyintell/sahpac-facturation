@@ -40,6 +40,7 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
   const [showNewIntervention, setShowNewIntervention] = useState(false);
   const [newInterventionName, setNewInterventionName] = useState('');
   const [newInterventionDesc, setNewInterventionDesc] = useState('');
+  const [newInterventionPrice, setNewInterventionPrice] = useState('');
   
   const [selectedZones, setSelectedZones] = useState<ZoneIntervention[]>([]);
   const [newZoneName, setNewZoneName] = useState('');
