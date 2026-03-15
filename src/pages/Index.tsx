@@ -165,6 +165,7 @@ const Index = () => {
         <InvoicePreview
           invoice={selectedInvoice}
           onClose={() => setSelectedInvoice(null)}
+          onUpdateInvoice={handleUpdateInvoice}
         />
       )}
     </div>
