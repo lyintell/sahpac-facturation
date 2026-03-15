@@ -11,6 +11,7 @@ export interface InterventionType {
   id: string;
   name: string;
   description: string;
+  standardPrice: number;
 }
 
 export interface ZoneIntervention {
