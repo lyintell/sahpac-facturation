@@ -7,13 +7,15 @@ import InvoicePreview from '@/components/InvoicePreview';
 import { useClients } from '@/hooks/useClients';
 import { useInvoices } from '@/hooks/useInvoices';
 import { useZones } from '@/hooks/useZones';
-import { Invoice, ZoneIntervention, Client } from '@/types';
+import { useInterventionTypes } from '@/hooks/useInterventionTypes';
+import { Invoice, ZoneIntervention, InterventionType, Client } from '@/types';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'invoices' | 'clients' | 'new'>('invoices');
   const { clients, loading: clientsLoading, addClient, updateClient, deleteClient } = useClients();
   const { invoices, loading: invoicesLoading, createInvoice, updateInvoice, deleteInvoice, copyInvoice } = useInvoices();
   const { zones, loading: zonesLoading, addZone } = useZones();
+  const { interventionTypes, loading: interventionTypesLoading, addType: addInterventionType } = useInterventionTypes();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [preselectedClientId, setPreselectedClientId] = useState<string | null>(null);
@@ -87,7 +89,7 @@ const Index = () => {
     createdAt: c.created_at ? new Date(c.created_at) : new Date(),
   }));
 
-  const isLoading = clientsLoading || invoicesLoading || zonesLoading;
+  const isLoading = clientsLoading || invoicesLoading || zonesLoading || interventionTypesLoading;
 
   if (isLoading) {
     return (
@@ -131,10 +133,12 @@ const Index = () => {
           <InvoiceForm
             clients={clientsData}
             zones={zonesData}
+            interventionTypes={interventionTypes}
             editingInvoice={editingInvoice}
             preselectedClientId={preselectedClientId}
             onAddClient={handleAddClient}
             onAddZone={handleAddZone}
+            onAddInterventionType={addInterventionType}
             onCreateInvoice={handleCreateInvoice}
             onUpdateInvoice={handleUpdateInvoice}
             onCancelEdit={handleCancelEdit}

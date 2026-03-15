@@ -12,20 +12,22 @@ import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { Client, Invoice, ZoneIntervention, INTERVENTION_TYPES, DEFAULT_TVA_RATE } from '@/types';
+import { Client, Invoice, ZoneIntervention, InterventionType, DEFAULT_TVA_RATE } from '@/types';
 interface InvoiceFormProps {
   clients: Client[];
   zones: ZoneIntervention[];
+  interventionTypes: InterventionType[];
   editingInvoice?: Invoice | null;
   preselectedClientId?: string | null;
   onAddClient: (client: Omit<Client, 'id' | 'createdAt'>) => void;
   onAddZone: (zone: Omit<ZoneIntervention, 'id'>) => Promise<ZoneIntervention | null>;
+  onAddInterventionType: (type: Omit<InterventionType, 'id'>) => Promise<InterventionType | null>;
   onCreateInvoice: (invoice: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => void;
   onUpdateInvoice?: (id: string, data: Partial<Invoice>) => void;
   onCancelEdit?: () => void;
 }
 
-const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAddClient, onAddZone, onCreateInvoice, onUpdateInvoice, onCancelEdit }: InvoiceFormProps) => {
+const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, preselectedClientId, onAddClient, onAddZone, onAddInterventionType, onCreateInvoice, onUpdateInvoice, onCancelEdit }: InvoiceFormProps) => {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [newClientName, setNewClientName] = useState('');
   const [newClientAddress, setNewClientAddress] = useState('');
@@ -35,6 +37,9 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
   const [workDescription, setWorkDescription] = useState('');
   const [selectedInterventionId, setSelectedInterventionId] = useState('');
   const [customInterventionDesc, setCustomInterventionDesc] = useState('');
+  const [showNewIntervention, setShowNewIntervention] = useState(false);
+  const [newInterventionName, setNewInterventionName] = useState('');
+  const [newInterventionDesc, setNewInterventionDesc] = useState('');
   
   const [selectedZones, setSelectedZones] = useState<ZoneIntervention[]>([]);
   const [newZoneName, setNewZoneName] = useState('');
@@ -84,7 +89,7 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
     setInvoiceDate(new Date());
   };
 
-  const selectedIntervention = INTERVENTION_TYPES.find(t => t.id === selectedInterventionId);
+  const selectedIntervention = interventionTypes.find(t => t.id === selectedInterventionId);
   
   const tvaAmount = useMemo(() => {
     if (!includeTva) return 0;
@@ -307,17 +312,26 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
           <div className="space-y-2">
             <Label>Type</Label>
             <Select value={selectedInterventionId} onValueChange={(value) => {
-              setSelectedInterventionId(value);
-              const intervention = INTERVENTION_TYPES.find(t => t.id === value);
-              if (intervention) {
-                setCustomInterventionDesc(intervention.description);
+              if (value === '__new_intervention__') {
+                setShowNewIntervention(true);
+                setSelectedInterventionId('');
+              } else {
+                setSelectedInterventionId(value);
+                setShowNewIntervention(false);
+                const intervention = interventionTypes.find(t => t.id === value);
+                if (intervention) {
+                  setCustomInterventionDesc(intervention.description);
+                }
               }
             }}>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner un type d'intervention" />
               </SelectTrigger>
               <SelectContent>
-                {INTERVENTION_TYPES.map(type => (
+                <SelectItem value="__new_intervention__" className="font-bold text-orange-500 focus:text-orange-500">
+                  NOUVEAU TYPE D'INTERVENTION
+                </SelectItem>
+                {interventionTypes.map(type => (
                   <SelectItem key={type.id} value={type.id}>
                     {type.name}
                   </SelectItem>
@@ -326,7 +340,49 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
             </Select>
           </div>
 
-          {selectedIntervention && (
+          {showNewIntervention && (
+            <div className="flex flex-col gap-3 p-4 bg-secondary/50 rounded-lg">
+              <Input
+                placeholder="Nom du type d'intervention"
+                value={newInterventionName}
+                onChange={(e) => setNewInterventionName(e.target.value)}
+              />
+              <Textarea
+                placeholder="Description de l'intervention"
+                value={newInterventionDesc}
+                onChange={(e) => setNewInterventionDesc(e.target.value)}
+                rows={3}
+              />
+              <div className="flex gap-2 justify-end">
+                <Button
+                  onClick={async () => {
+                    if (newInterventionName.trim()) {
+                      const saved = await onAddInterventionType({
+                        name: newInterventionName.trim(),
+                        description: newInterventionDesc.trim(),
+                      });
+                      if (saved) {
+                        setSelectedInterventionId(saved.id);
+                        setCustomInterventionDesc(saved.description);
+                        setShowNewIntervention(false);
+                        setNewInterventionName('');
+                        setNewInterventionDesc('');
+                      }
+                    }
+                  }}
+                  disabled={!newInterventionName.trim()}
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Enregistrer
+                </Button>
+                <Button variant="ghost" onClick={() => setShowNewIntervention(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {selectedIntervention && !showNewIntervention && (
             <div className="space-y-2">
               <Label>Description de l'intervention</Label>
               <Textarea
