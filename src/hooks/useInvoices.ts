@@ -207,6 +207,7 @@ export const useInvoices = () => {
     if (invoiceData.observations !== undefined) dbData.observations = invoiceData.observations;
     if (invoiceData.isProForma !== undefined) dbData.is_pro_forma = invoiceData.isProForma;
     if (invoiceData.status !== undefined) dbData.status = invoiceData.status;
+    if (invoiceData.paidAmount !== undefined) dbData.paid_amount = invoiceData.paidAmount;
     if (invoiceData.paidAt !== undefined) dbData.paid_at = invoiceData.paidAt instanceof Date ? invoiceData.paidAt.toISOString() : invoiceData.paidAt;
     if (newInvoiceNumber) dbData.invoice_number = newInvoiceNumber;
     

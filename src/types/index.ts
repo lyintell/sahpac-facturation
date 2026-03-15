@@ -55,6 +55,7 @@ export interface Invoice {
   includeTva?: boolean;
   isProForma: boolean;
   status: InvoiceStatus;
+  paidAmount: number;
   paidAt?: Date;
   createdAt: Date;
 }
