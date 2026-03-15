@@ -189,7 +189,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
           <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
             <CardContent className="p-3 sm:p-4 text-center">
               <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">Total Payé</p>
-              <p className="text-sm sm:text-xl font-bold text-green-700 dark:text-green-300">{financialStats.totalPaid.toLocaleString('fr-FR')} F</p>
+              <p className="text-sm sm:text-xl font-bold text-green-700 dark:text-green-300"><p className="text-sm sm:text-xl font-bold text-green-700 dark:text-green-300">{financialStats.totalPaid.toLocaleString('fr-FR')} FCFA</p></p>
             </CardContent>
           </Card>
           <Card className="bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800">
