@@ -40,6 +40,13 @@ const AdminPanel = ({
   const [zoneName, setZoneName] = useState('');
   const [editingZoneId, setEditingZoneId] = useState<string | null>(null);
 
+  // Password form
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const navigate = useNavigate();
+
   const resetItForm = () => { setItName(''); setItDesc(''); setItPrice(''); setEditingItId(null); };
   const resetZoneForm = () => { setZoneName(''); setEditingZoneId(null); };
 
