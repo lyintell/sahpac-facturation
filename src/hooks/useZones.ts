@@ -108,5 +108,5 @@ export const useZones = () => {
     }
   }, [loading, zones.length, user, initializeDefaultZones]);
 
-  return { zones, loading, addZone, deleteZone, refetch: fetchZones };
+  return { zones, loading, addZone, updateZone, deleteZone, refetch: fetchZones };
 };
