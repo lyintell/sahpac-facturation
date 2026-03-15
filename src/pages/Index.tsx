@@ -4,6 +4,7 @@ import ClientManager from '@/components/ClientManager';
 import InvoiceForm from '@/components/InvoiceForm';
 import InvoiceList from '@/components/InvoiceList';
 import InvoicePreview from '@/components/InvoicePreview';
+import AdminPanel from '@/components/AdminPanel';
 import { useClients } from '@/hooks/useClients';
 import { useInvoices } from '@/hooks/useInvoices';
 import { useZones } from '@/hooks/useZones';
@@ -11,7 +12,7 @@ import { useInterventionTypes } from '@/hooks/useInterventionTypes';
 import { Invoice, ZoneIntervention, InterventionType, Client } from '@/types';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<'invoices' | 'clients' | 'new'>('invoices');
+  const [activeTab, setActiveTab] = useState<'invoices' | 'clients' | 'new' | 'admin'>('invoices');
   const { clients, loading: clientsLoading, addClient, updateClient, deleteClient } = useClients();
   const { invoices, loading: invoicesLoading, createInvoice, updateInvoice, deleteInvoice, copyInvoice } = useInvoices();
   const { zones, loading: zonesLoading, addZone } = useZones();
