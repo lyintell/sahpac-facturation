@@ -40,6 +40,7 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
   const [showNewIntervention, setShowNewIntervention] = useState(false);
   const [newInterventionName, setNewInterventionName] = useState('');
   const [newInterventionDesc, setNewInterventionDesc] = useState('');
+  const [newInterventionPrice, setNewInterventionPrice] = useState('');
   
   const [selectedZones, setSelectedZones] = useState<ZoneIntervention[]>([]);
   const [newZoneName, setNewZoneName] = useState('');
@@ -321,6 +322,9 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
                 const intervention = interventionTypes.find(t => t.id === value);
                 if (intervention) {
                   setCustomInterventionDesc(intervention.description);
+                  if (intervention.standardPrice > 0) {
+                    setAmountHT(intervention.standardPrice.toString());
+                  }
                 }
               }
             }}>
@@ -353,24 +357,38 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
                 onChange={(e) => setNewInterventionDesc(e.target.value)}
                 rows={3}
               />
+              <div className="space-y-1">
+                <Label>Prix standard (FCFA)</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={newInterventionPrice}
+                  onChange={(e) => setNewInterventionPrice(e.target.value)}
+                />
+              </div>
               <div className="flex gap-2 justify-end">
                 <Button
                   onClick={async () => {
-                    if (newInterventionName.trim()) {
+                    if (newInterventionName.trim() && newInterventionPrice.trim()) {
                       const saved = await onAddInterventionType({
                         name: newInterventionName.trim(),
                         description: newInterventionDesc.trim(),
+                        standardPrice: parseFloat(newInterventionPrice) || 0,
                       });
                       if (saved) {
                         setSelectedInterventionId(saved.id);
                         setCustomInterventionDesc(saved.description);
+                        if (saved.standardPrice > 0) {
+                          setAmountHT(saved.standardPrice.toString());
+                        }
                         setShowNewIntervention(false);
                         setNewInterventionName('');
                         setNewInterventionDesc('');
+                        setNewInterventionPrice('');
                       }
                     }
                   }}
-                  disabled={!newInterventionName.trim()}
+                  disabled={!newInterventionName.trim() || !newInterventionPrice.trim()}
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
