@@ -133,10 +133,12 @@ const Index = () => {
           <InvoiceForm
             clients={clientsData}
             zones={zonesData}
+            interventionTypes={interventionTypes}
             editingInvoice={editingInvoice}
             preselectedClientId={preselectedClientId}
             onAddClient={handleAddClient}
             onAddZone={handleAddZone}
+            onAddInterventionType={addInterventionType}
             onCreateInvoice={handleCreateInvoice}
             onUpdateInvoice={handleUpdateInvoice}
             onCancelEdit={handleCancelEdit}
