@@ -287,7 +287,9 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                   : "Aucune facture trouvée pour cette recherche."}
               </p>
             ) : (
-            <div className="overflow-x-auto">
+            <>
+            {/* Desktop table */}
+            <div className="overflow-x-auto hidden md:block">
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
@@ -408,6 +410,72 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile cards */}
+            <div className="md:hidden space-y-3">
+              {filteredInvoices.map((invoice) => (
+                <div key={invoice.id} className="border rounded-lg p-3 space-y-2 bg-card">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm">{invoice.invoiceNumber}</span>
+                        <Badge variant={invoice.isProForma !== false ? 'secondary' : 'default'} className="text-xs">
+                          {invoice.isProForma !== false ? 'Pro Forma' : 'Définitive'}
+                        </Badge>
+                      </div>
+                      <p className="font-medium mt-1">{invoice.clientName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(invoice.date), 'dd/MM/yyyy', { locale: fr })} · {invoice.interventionTypeName}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-bold">{invoice.totalAmount.toLocaleString('fr-FR')} F</p>
+                      {invoice.isProForma === false && (
+                        <div className="mt-1">
+                          {invoice.status === 'paid' ? (
+                            <Badge variant="default" className="bg-green-600 hover:bg-green-600 text-xs">Payée</Badge>
+                          ) : (invoice.paidAmount || 0) > 0 ? (
+                            <div className="flex flex-col items-end gap-0.5">
+                              <Badge variant="outline" className="text-orange-600 border-orange-600 text-xs">Partiel</Badge>
+                              <span className="text-[10px] text-muted-foreground">
+                                {(invoice.paidAmount || 0).toLocaleString('fr-FR')} / {invoice.totalAmount.toLocaleString('fr-FR')} F
+                              </span>
+                            </div>
+                          ) : (
+                            <Badge variant="outline" className="text-orange-600 border-orange-600 text-xs">En attente</Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-1 border-t pt-2">
+                    {invoice.isProForma !== false && (
+                      <Button size="sm" variant="ghost" onClick={() => setConvertInvoice(invoice)} className="h-8 w-8 p-0">
+                        <FileCheck className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {invoice.isProForma === false && invoice.status !== 'paid' && (
+                      <Button size="sm" variant="ghost" onClick={() => openPayDialog(invoice)} className="h-8 w-8 p-0 text-green-600">
+                        <Banknote className="w-4 h-4" />
+                      </Button>
+                    )}
+                    <Button size="sm" variant="ghost" onClick={() => onEditInvoice(invoice)} className="h-8 w-8 p-0">
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => onCopyInvoice(invoice)} className="h-8 w-8 p-0">
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => onViewInvoice(invoice)} className="h-8 w-8 p-0">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setDeleteInvoice(invoice)} className="h-8 w-8 p-0 text-destructive">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            </>
             )}
           </CardContent>
         </Card>
