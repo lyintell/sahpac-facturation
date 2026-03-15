@@ -324,12 +324,24 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                       </td>
                       <td className="py-3 px-2">
                         {invoice.isProForma === false ? (
-                          <Badge 
-                            variant={invoice.status === 'paid' ? 'default' : 'outline'}
-                            className={invoice.status === 'paid' ? 'bg-green-600 hover:bg-green-600' : 'text-orange-600 border-orange-600'}
-                          >
-                            {invoice.status === 'paid' ? 'Payée' : 'En attente'}
-                          </Badge>
+                          invoice.status === 'paid' ? (
+                            <Badge variant="default" className="bg-green-600 hover:bg-green-600">
+                              Payée
+                            </Badge>
+                          ) : (invoice.paidAmount || 0) > 0 ? (
+                            <div className="flex flex-col gap-0.5">
+                              <Badge variant="outline" className="text-orange-600 border-orange-600">
+                                Partiel
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {(invoice.paidAmount || 0).toLocaleString('fr-FR')} / {invoice.totalAmount.toLocaleString('fr-FR')} F
+                              </span>
+                            </div>
+                          ) : (
+                            <Badge variant="outline" className="text-orange-600 border-orange-600">
+                              En attente
+                            </Badge>
+                          )
                         ) : (
                           <span className="text-muted-foreground text-sm">—</span>
                         )}
