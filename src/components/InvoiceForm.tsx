@@ -27,7 +27,7 @@ interface InvoiceFormProps {
   onCancelEdit?: () => void;
 }
 
-const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAddClient, onAddZone, onCreateInvoice, onUpdateInvoice, onCancelEdit }: InvoiceFormProps) => {
+const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, preselectedClientId, onAddClient, onAddZone, onAddInterventionType, onCreateInvoice, onUpdateInvoice, onCancelEdit }: InvoiceFormProps) => {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [newClientName, setNewClientName] = useState('');
   const [newClientAddress, setNewClientAddress] = useState('');
