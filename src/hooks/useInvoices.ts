@@ -100,7 +100,7 @@ export const useInvoices = () => {
 
   const generateInvoiceNumber = useCallback(async (isProForma: boolean) => {
     const year = new Date().getFullYear();
-    const prefix = isProForma ? 'PF' : 'FAC';
+    const shortYear = String(year).slice(-2);
     
     // Count existing invoices of this type for the year
     const { count } = await supabase
@@ -111,7 +111,7 @@ export const useInvoices = () => {
       .lte('date', `${year}-12-31`);
     
     const nextNum = (count || 0) + 1;
-    return `${prefix}-${year}-${String(nextNum).padStart(4, '0')}`;
+    return `${String(nextNum).padStart(3, '0')} / ${shortYear}`;
   }, []);
 
   const createInvoice = useCallback(async (invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => {
