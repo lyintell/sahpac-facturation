@@ -304,6 +304,32 @@ const AdminPanel = ({
             </CardContent>
           </Card>
         </TabsContent>
+        {/* Password Tab */}
+        <TabsContent value="password" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Changer le mot de passe</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 max-w-md">
+              <div>
+                <Label>Mot de passe actuel *</Label>
+                <Input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="••••••••" />
+              </div>
+              <div>
+                <Label>Nouveau mot de passe *</Label>
+                <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="••••••••" minLength={6} />
+              </div>
+              <div>
+                <Label>Confirmer le nouveau mot de passe *</Label>
+                <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" minLength={6} />
+              </div>
+              <Button onClick={handleChangePassword} disabled={passwordLoading}>
+                <Save className="w-4 h-4 mr-2" />
+                {passwordLoading ? 'Modification...' : 'Changer le mot de passe'}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
