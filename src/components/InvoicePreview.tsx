@@ -1,8 +1,20 @@
 import { useRef, useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Printer, X, Download } from "lucide-react";
+import { Printer, X, Download, Banknote } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Invoice } from "@/types";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -10,6 +22,7 @@ import html2canvas from "html2canvas";
 interface InvoicePreviewProps {
   invoice: Invoice;
   onClose: () => void;
+  onUpdateInvoice?: (id: string, data: Partial<Invoice>) => void;
 }
 
 const numberToWords = (num: number): string => {
