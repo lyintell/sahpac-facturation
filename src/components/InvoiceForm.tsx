@@ -54,6 +54,7 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
   const [isProForma, setIsProForma] = useState(true);
   const [observations, setObservations] = useState('');
   const [invoiceDate, setInvoiceDate] = useState<Date>(new Date());
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   // Load editing invoice data or preselected client
   useEffect(() => {
