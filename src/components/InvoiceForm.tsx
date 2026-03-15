@@ -158,6 +158,7 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
       totalAmount,
       isProForma,
       status: editingInvoice?.status || 'pending',
+      paidAmount: editingInvoice?.paidAmount || 0,
     };
 
     if (editingInvoice && onUpdateInvoice) {

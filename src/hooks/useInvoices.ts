@@ -29,6 +29,7 @@ type DbInvoiceRow = {
   include_tva: boolean;
   observations: string | null;
   is_pro_forma: boolean;
+  paid_amount: number;
   status: string | null;
   paid_at: string | null;
   created_at: string;
@@ -67,6 +68,7 @@ const mapDbToInvoice = (db: DbInvoiceRow): Invoice => {
     observations: db.observations || undefined,
     isProForma: db.is_pro_forma,
     status: (db.status as 'pending' | 'paid') || 'pending',
+    paidAmount: Number(db.paid_amount) || 0,
     paidAt: db.paid_at ? new Date(db.paid_at) : undefined,
     createdAt: new Date(db.created_at),
   };
@@ -205,6 +207,7 @@ export const useInvoices = () => {
     if (invoiceData.observations !== undefined) dbData.observations = invoiceData.observations;
     if (invoiceData.isProForma !== undefined) dbData.is_pro_forma = invoiceData.isProForma;
     if (invoiceData.status !== undefined) dbData.status = invoiceData.status;
+    if (invoiceData.paidAmount !== undefined) dbData.paid_amount = invoiceData.paidAmount;
     if (invoiceData.paidAt !== undefined) dbData.paid_at = invoiceData.paidAt instanceof Date ? invoiceData.paidAt.toISOString() : invoiceData.paidAt;
     if (newInvoiceNumber) dbData.invoice_number = newInvoiceNumber;
     

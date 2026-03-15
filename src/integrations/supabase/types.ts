@@ -92,6 +92,7 @@ export type Database = {
           is_pro_forma: boolean
           items: Json
           observations: string | null
+          paid_amount: number
           paid_at: string | null
           status: string | null
           subtotal: number
@@ -121,6 +122,7 @@ export type Database = {
           is_pro_forma?: boolean
           items?: Json
           observations?: string | null
+          paid_amount?: number
           paid_at?: string | null
           status?: string | null
           subtotal?: number
@@ -150,6 +152,7 @@ export type Database = {
           is_pro_forma?: boolean
           items?: Json
           observations?: string | null
+          paid_amount?: number
           paid_at?: string | null
           status?: string | null
           subtotal?: number

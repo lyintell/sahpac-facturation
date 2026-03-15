@@ -4,6 +4,7 @@ import { fr } from 'date-fns/locale';
 import { Eye, Trash2, FileText, FileCheck, Search, Edit2, Copy, CalendarIcon, X, Banknote, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
@@ -36,6 +37,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
   const [convertInvoice, setConvertInvoice] = useState<Invoice | null>(null);
   const [payInvoice, setPayInvoice] = useState<Invoice | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'proforma' | 'definitive'>('all');
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'pending'>('all');
@@ -120,9 +122,27 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
 
   const handleConfirmPay = () => {
     if (payInvoice) {
-      onUpdateInvoice(payInvoice.id, { status: 'paid', paidAt: new Date() });
+      const amount = parseFloat(paymentAmount) || 0;
+      if (amount <= 0) return;
+      const totalPaid = (payInvoice.paidAmount || 0) + amount;
+      const remaining = payInvoice.totalAmount - totalPaid;
+      
+      if (remaining <= 0) {
+        // Fully paid
+        onUpdateInvoice(payInvoice.id, { status: 'paid', paidAmount: payInvoice.totalAmount, paidAt: new Date() });
+      } else {
+        // Partial payment
+        onUpdateInvoice(payInvoice.id, { paidAmount: totalPaid });
+      }
       setPayInvoice(null);
+      setPaymentAmount('');
     }
+  };
+
+  const openPayDialog = (invoice: Invoice) => {
+    setPayInvoice(invoice);
+    const remaining = invoice.totalAmount - (invoice.paidAmount || 0);
+    setPaymentAmount(String(remaining));
   };
 
   if (invoices.length === 0) {
@@ -304,12 +324,24 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                       </td>
                       <td className="py-3 px-2">
                         {invoice.isProForma === false ? (
-                          <Badge 
-                            variant={invoice.status === 'paid' ? 'default' : 'outline'}
-                            className={invoice.status === 'paid' ? 'bg-green-600 hover:bg-green-600' : 'text-orange-600 border-orange-600'}
-                          >
-                            {invoice.status === 'paid' ? 'Payée' : 'En attente'}
-                          </Badge>
+                          invoice.status === 'paid' ? (
+                            <Badge variant="default" className="bg-green-600 hover:bg-green-600">
+                              Payée
+                            </Badge>
+                          ) : (invoice.paidAmount || 0) > 0 ? (
+                            <div className="flex flex-col gap-0.5">
+                              <Badge variant="outline" className="text-orange-600 border-orange-600">
+                                Partiel
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {(invoice.paidAmount || 0).toLocaleString('fr-FR')} / {invoice.totalAmount.toLocaleString('fr-FR')} F
+                              </span>
+                            </div>
+                          ) : (
+                            <Badge variant="outline" className="text-orange-600 border-orange-600">
+                              En attente
+                            </Badge>
+                          )
                         ) : (
                           <span className="text-muted-foreground text-sm">—</span>
                         )}
@@ -330,8 +362,8 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => setPayInvoice(invoice)}
-                              title="Marquer comme payée"
+                              onClick={() => openPayDialog(invoice)}
+                              title="Enregistrer un paiement"
                               className="text-green-600 hover:text-green-700"
                             >
                               <Banknote className="w-4 h-4" />
@@ -417,17 +449,35 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!payInvoice} onOpenChange={(open) => !open && setPayInvoice(null)}>
+      <AlertDialog open={!!payInvoice} onOpenChange={(open) => { if (!open) { setPayInvoice(null); setPaymentAmount(''); } }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Marquer comme payée</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir marquer la facture <strong>{payInvoice?.invoiceNumber}</strong> comme payée ?
+            <AlertDialogTitle>Enregistrer un paiement</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  Facture <strong>{payInvoice?.invoiceNumber}</strong> — Total: <strong>{payInvoice?.totalAmount.toLocaleString('fr-FR')} F</strong>
+                </p>
+                {(payInvoice?.paidAmount || 0) > 0 && (
+                  <p>Déjà payé: <strong>{(payInvoice?.paidAmount || 0).toLocaleString('fr-FR')} F</strong> — Reste: <strong>{((payInvoice?.totalAmount || 0) - (payInvoice?.paidAmount || 0)).toLocaleString('fr-FR')} F</strong></p>
+                )}
+                <div className="space-y-1.5">
+                  <Label htmlFor="payment-amount">Montant du paiement (F)</Label>
+                  <Input
+                    id="payment-amount"
+                    type="number"
+                    min="0"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    placeholder="Montant..."
+                  />
+                </div>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmPay} className="bg-green-600 hover:bg-green-700">
+            <AlertDialogAction onClick={handleConfirmPay} className="bg-green-600 hover:bg-green-700" disabled={!paymentAmount || parseFloat(paymentAmount) <= 0}>
               Confirmer le paiement
             </AlertDialogAction>
           </AlertDialogFooter>
