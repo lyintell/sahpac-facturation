@@ -313,7 +313,7 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
               <div className="flex items-baseline font-bold text-lg pt-2">
                 <span className="shrink-0">Total{invoice.tvaRate > 0 ? " TTC" : ""}</span>
                 <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
-                <span className="shrink-0">{invoice.totalAmount.toLocaleString("fr-FR")} F</span>
+                <span className="shrink-0"><span className="shrink-0">{invoice.totalAmount.toLocaleString("fr-FR")} FCFA</span></span>
               </div>
               {/* Partial payment info */}
               {!invoice.isProForma && (invoice.paidAmount || 0) > 0 && invoice.status !== 'paid' && (
