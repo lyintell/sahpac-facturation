@@ -54,6 +54,21 @@ export const useZones = () => {
     return data;
   }, [user]);
 
+  const updateZone = useCallback(async (id: string, data: Partial<{ name: string }>) => {
+    const { error } = await supabase
+      .from('zones')
+      .update(data)
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error updating zone:', error);
+      toast.error('Erreur lors de la mise à jour de la zone');
+      return;
+    }
+    
+    setZones(prev => prev.map(z => z.id === id ? { ...z, ...data } : z));
+  }, []);
+
   const deleteZone = useCallback(async (id: string) => {
     const { error } = await supabase
       .from('zones')
