@@ -145,6 +145,20 @@ const Index = () => {
             onCancelEdit={handleCancelEdit}
           />
         )}
+
+        {activeTab === 'admin' && (
+          <AdminPanel
+            interventionTypes={interventionTypes}
+            zones={zonesData}
+            onAddInterventionType={addInterventionType}
+            onUpdateInterventionType={async (id, data) => await updateInterventionType(id, data)}
+            onDeleteInterventionType={async (id) => await deleteInterventionType(id)}
+            onAddZone={handleAddZone}
+            onUpdateZone={async (id, data) => await updateZone(id, data)}
+            onDeleteZone={async (id) => await deleteZone(id)}
+            onClose={() => setActiveTab('invoices')}
+          />
+        )}
       </main>
 
       {selectedInvoice && (
