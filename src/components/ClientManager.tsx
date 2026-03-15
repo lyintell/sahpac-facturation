@@ -83,6 +83,13 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
     return invoices.filter(inv => inv.clientId === clientId).length;
   };
 
+  const getClientFinancials = (clientId: string) => {
+    const clientDefInvoices = invoices.filter(inv => inv.clientId === clientId && inv.isProForma === false);
+    const total = clientDefInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+    const paid = clientDefInvoices.reduce((sum, inv) => sum + (inv.paidAmount || 0), 0);
+    return { total, paid, remaining: total - paid };
+  };
+
   const filteredClients = useMemo(() => {
     if (!searchQuery.trim()) return clients;
     const query = searchQuery.toLowerCase();
@@ -229,6 +236,18 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
                         {client.phone && (
                           <p className="text-sm text-muted-foreground">Tél: {client.phone}</p>
                         )}
+                        {(() => {
+                          const fin = getClientFinancials(client.id);
+                          return fin.total > 0 ? (
+                            <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs">
+                              <span className="text-blue-600 dark:text-blue-400">Total: {fin.total.toLocaleString('fr-FR')} F</span>
+                              <span className="text-green-600 dark:text-green-400">Payé: {fin.paid.toLocaleString('fr-FR')} F</span>
+                              {fin.remaining > 0 && (
+                                <span className="text-orange-600 dark:text-orange-400 font-medium">Reliquat: {fin.remaining.toLocaleString('fr-FR')} F</span>
+                              )}
+                            </div>
+                          ) : null;
+                        })()}
                       </div>
                     )}
                     
