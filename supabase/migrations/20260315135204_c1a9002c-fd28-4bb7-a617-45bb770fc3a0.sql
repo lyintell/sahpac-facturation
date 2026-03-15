@@ -1,0 +1,1 @@
+ALTER TABLE public.intervention_types ADD COLUMN standard_price numeric NOT NULL DEFAULT 0;
