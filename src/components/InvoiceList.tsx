@@ -475,6 +475,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                 </div>
               ))}
             </div>
+            </>
             )}
           </CardContent>
         </Card>
