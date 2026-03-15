@@ -197,7 +197,7 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
                 {filteredClients.map((client) => (
                   <div
                     key={client.id}
-                    className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors gap-2"
                   >
                     {editingId === client.id ? (
                       <div className="flex-1 flex flex-col md:flex-row gap-2 mr-4">
