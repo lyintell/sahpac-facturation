@@ -68,6 +68,7 @@ const mapDbToInvoice = (db: DbInvoiceRow): Invoice => {
     observations: db.observations || undefined,
     isProForma: db.is_pro_forma,
     status: (db.status as 'pending' | 'paid') || 'pending',
+    paidAmount: Number(db.paid_amount) || 0,
     paidAt: db.paid_at ? new Date(db.paid_at) : undefined,
     createdAt: new Date(db.created_at),
   };
