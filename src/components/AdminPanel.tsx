@@ -50,6 +50,31 @@ const AdminPanel = ({
   const resetItForm = () => { setItName(''); setItDesc(''); setItPrice(''); setEditingItId(null); };
   const resetZoneForm = () => { setZoneName(''); setEditingZoneId(null); };
 
+  const handleChangePassword = useCallback(async () => {
+    if (!currentPassword) { toast.error('Le mot de passe actuel est requis'); return; }
+    if (!newPassword || newPassword.length < 6) { toast.error('Le nouveau mot de passe doit contenir au moins 6 caractères'); return; }
+    if (newPassword !== confirmPassword) { toast.error('Les mots de passe ne correspondent pas'); return; }
+
+    setPasswordLoading(true);
+    // Verify current password by re-signing in
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) { toast.error('Utilisateur non trouvé'); setPasswordLoading(false); return; }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+    if (signInError) { toast.error('Mot de passe actuel incorrect'); setPasswordLoading(false); return; }
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPasswordLoading(false);
+    if (error) { toast.error(error.message); return; }
+
+    toast.success('Mot de passe modifié avec succès');
+    await supabase.auth.signOut();
+    navigate('/auth');
+  }, [currentPassword, newPassword, confirmPassword, navigate]);
+
   const handleSaveIt = useCallback(async () => {
     if (!itName.trim()) { toast.error('Le nom est requis'); return; }
     if (!itPrice || isNaN(Number(itPrice))) { toast.error('Le prix standard est requis'); return; }
