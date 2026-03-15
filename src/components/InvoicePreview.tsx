@@ -118,9 +118,11 @@ const numberToWords = (num: number): string => {
   return words.trim();
 };
 
-const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
+const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewProps) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [showPayDialog, setShowPayDialog] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState('');
 
   const handlePrint = () => {
     window.print();
