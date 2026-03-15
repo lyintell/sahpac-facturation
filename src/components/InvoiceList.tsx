@@ -37,6 +37,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
   const [convertInvoice, setConvertInvoice] = useState<Invoice | null>(null);
   const [payInvoice, setPayInvoice] = useState<Invoice | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'proforma' | 'definitive'>('all');
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'pending'>('all');
