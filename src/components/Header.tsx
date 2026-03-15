@@ -1,12 +1,12 @@
-import { FileText, Users, LogOut } from 'lucide-react';
+import { FileText, Users, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import sahpacLogo from '@/assets/sahpac-logo.png';
 
 interface HeaderProps {
-  activeTab: 'invoices' | 'clients' | 'new';
-  onTabChange: (tab: 'invoices' | 'clients' | 'new') => void;
+  activeTab: 'invoices' | 'clients' | 'new' | 'admin';
+  onTabChange: (tab: 'invoices' | 'clients' | 'new' | 'admin') => void;
 }
 
 const Header = ({ activeTab, onTabChange }: HeaderProps) => {
