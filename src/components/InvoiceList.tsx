@@ -287,6 +287,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                   : "Aucune facture trouvée pour cette recherche."}
               </p>
             ) : (
+            <>
             {/* Desktop table */}
             <div className="overflow-x-auto hidden md:block">
               <table className="w-full">
