@@ -200,23 +200,29 @@ const InvoiceForm = ({ clients, zones, editingInvoice, preselectedClientId, onAd
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Client</Label>
-              <div className="flex gap-2">
-                <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Sélectionner un client" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map(client => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" onClick={() => setShowNewClient(!showNewClient)}>
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
+              <Select value={selectedClientId} onValueChange={(value) => {
+                if (value === '__new_client__') {
+                  setShowNewClient(true);
+                  setSelectedClientId('');
+                } else {
+                  setSelectedClientId(value);
+                  setShowNewClient(false);
+                }
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner un client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__new_client__" className="font-bold text-orange-500 focus:text-orange-500">
+                    NOUVEAU CLIENT
+                  </SelectItem>
+                  {clients.map(client => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
