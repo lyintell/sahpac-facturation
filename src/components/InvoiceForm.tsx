@@ -54,6 +54,7 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
   const [isProForma, setIsProForma] = useState(true);
   const [observations, setObservations] = useState('');
   const [invoiceDate, setInvoiceDate] = useState<Date>(new Date());
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   // Load editing invoice data or preselected client
   useEffect(() => {
@@ -233,7 +234,7 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
 
             <div className="space-y-2">
               <Label>Date de la facture</Label>
-              <Popover>
+              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -250,7 +251,12 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
                   <Calendar
                     mode="single"
                     selected={invoiceDate}
-                    onSelect={(date) => date && setInvoiceDate(date)}
+                    onSelect={(date) => {
+                      if (date) {
+                        setInvoiceDate(date);
+                        setDatePickerOpen(false);
+                      }
+                    }}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
                   />
