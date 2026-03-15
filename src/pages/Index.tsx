@@ -7,7 +7,8 @@ import InvoicePreview from '@/components/InvoicePreview';
 import { useClients } from '@/hooks/useClients';
 import { useInvoices } from '@/hooks/useInvoices';
 import { useZones } from '@/hooks/useZones';
-import { Invoice, ZoneIntervention, Client } from '@/types';
+import { useInterventionTypes } from '@/hooks/useInterventionTypes';
+import { Invoice, ZoneIntervention, InterventionType, Client } from '@/types';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'invoices' | 'clients' | 'new'>('invoices');

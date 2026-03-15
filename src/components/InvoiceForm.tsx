@@ -312,17 +312,26 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
           <div className="space-y-2">
             <Label>Type</Label>
             <Select value={selectedInterventionId} onValueChange={(value) => {
-              setSelectedInterventionId(value);
-              const intervention = INTERVENTION_TYPES.find(t => t.id === value);
-              if (intervention) {
-                setCustomInterventionDesc(intervention.description);
+              if (value === '__new_intervention__') {
+                setShowNewIntervention(true);
+                setSelectedInterventionId('');
+              } else {
+                setSelectedInterventionId(value);
+                setShowNewIntervention(false);
+                const intervention = interventionTypes.find(t => t.id === value);
+                if (intervention) {
+                  setCustomInterventionDesc(intervention.description);
+                }
               }
             }}>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner un type d'intervention" />
               </SelectTrigger>
               <SelectContent>
-                {INTERVENTION_TYPES.map(type => (
+                <SelectItem value="__new_intervention__" className="font-bold text-orange-500 focus:text-orange-500">
+                  NOUVEAU TYPE D'INTERVENTION
+                </SelectItem>
+                {interventionTypes.map(type => (
                   <SelectItem key={type.id} value={type.id}>
                     {type.name}
                   </SelectItem>
@@ -331,7 +340,49 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
             </Select>
           </div>
 
-          {selectedIntervention && (
+          {showNewIntervention && (
+            <div className="flex flex-col gap-3 p-4 bg-secondary/50 rounded-lg">
+              <Input
+                placeholder="Nom du type d'intervention"
+                value={newInterventionName}
+                onChange={(e) => setNewInterventionName(e.target.value)}
+              />
+              <Textarea
+                placeholder="Description de l'intervention"
+                value={newInterventionDesc}
+                onChange={(e) => setNewInterventionDesc(e.target.value)}
+                rows={3}
+              />
+              <div className="flex gap-2 justify-end">
+                <Button
+                  onClick={async () => {
+                    if (newInterventionName.trim()) {
+                      const saved = await onAddInterventionType({
+                        name: newInterventionName.trim(),
+                        description: newInterventionDesc.trim(),
+                      });
+                      if (saved) {
+                        setSelectedInterventionId(saved.id);
+                        setCustomInterventionDesc(saved.description);
+                        setShowNewIntervention(false);
+                        setNewInterventionName('');
+                        setNewInterventionDesc('');
+                      }
+                    }
+                  }}
+                  disabled={!newInterventionName.trim()}
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Enregistrer
+                </Button>
+                <Button variant="ghost" onClick={() => setShowNewIntervention(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {selectedIntervention && !showNewIntervention && (
             <div className="space-y-2">
               <Label>Description de l'intervention</Label>
               <Textarea
