@@ -15,6 +15,7 @@ const Index = () => {
   const { clients, loading: clientsLoading, addClient, updateClient, deleteClient } = useClients();
   const { invoices, loading: invoicesLoading, createInvoice, updateInvoice, deleteInvoice, copyInvoice } = useInvoices();
   const { zones, loading: zonesLoading, addZone } = useZones();
+  const { interventionTypes, loading: interventionTypesLoading, addType: addInterventionType } = useInterventionTypes();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [preselectedClientId, setPreselectedClientId] = useState<string | null>(null);
