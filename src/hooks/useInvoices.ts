@@ -29,6 +29,7 @@ type DbInvoiceRow = {
   include_tva: boolean;
   observations: string | null;
   is_pro_forma: boolean;
+  paid_amount: number;
   status: string | null;
   paid_at: string | null;
   created_at: string;
