@@ -321,6 +321,9 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
                 const intervention = interventionTypes.find(t => t.id === value);
                 if (intervention) {
                   setCustomInterventionDesc(intervention.description);
+                  if (intervention.standardPrice > 0) {
+                    setAmountHT(intervention.standardPrice.toString());
+                  }
                 }
               }
             }}>
