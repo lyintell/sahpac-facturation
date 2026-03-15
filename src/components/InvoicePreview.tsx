@@ -1,8 +1,20 @@
 import { useRef, useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Printer, X, Download } from "lucide-react";
+import { Printer, X, Download, Banknote } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Invoice } from "@/types";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -10,6 +22,7 @@ import html2canvas from "html2canvas";
 interface InvoicePreviewProps {
   invoice: Invoice;
   onClose: () => void;
+  onUpdateInvoice?: (id: string, data: Partial<Invoice>) => void;
 }
 
 const numberToWords = (num: number): string => {
@@ -105,9 +118,11 @@ const numberToWords = (num: number): string => {
   return words.trim();
 };
 
-const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
+const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewProps) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [showPayDialog, setShowPayDialog] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState('');
 
   const handlePrint = () => {
     window.print();
@@ -160,6 +175,20 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
       <div className="min-h-full flex flex-col items-center py-4 px-4">
         <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
         <div className="no-print flex justify-end gap-2 mb-4">
+          {!invoice.isProForma && invoice.status !== 'paid' && onUpdateInvoice && (
+            <Button
+              onClick={() => {
+                const remaining = invoice.totalAmount - (invoice.paidAmount || 0);
+                setPaymentAmount(String(remaining));
+                setShowPayDialog(true);
+              }}
+              variant="secondary"
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Banknote className="w-4 h-4 mr-2" />
+              Enregistrer un paiement
+            </Button>
+          )}
           <Button 
             onClick={handleExportPDF} 
             variant="secondary" 
@@ -328,6 +357,58 @@ const InvoicePreview = ({ invoice, onClose }: InvoicePreviewProps) => {
         </div>
         </div>
       </div>
+
+      {/* Payment Dialog */}
+      <AlertDialog open={showPayDialog} onOpenChange={(open) => { if (!open) { setShowPayDialog(false); setPaymentAmount(''); } }}>
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enregistrer un paiement</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  Facture <strong>{invoice.invoiceNumber}</strong> — Total: <strong>{invoice.totalAmount.toLocaleString('fr-FR')} F</strong>
+                </p>
+                {(invoice.paidAmount || 0) > 0 && (
+                  <p>Déjà payé: <strong>{(invoice.paidAmount || 0).toLocaleString('fr-FR')} F</strong> — Reste: <strong>{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString('fr-FR')} F</strong></p>
+                )}
+                <div className="space-y-1.5">
+                  <Label htmlFor="preview-payment-amount">Montant du paiement (F)</Label>
+                  <Input
+                    id="preview-payment-amount"
+                    type="number"
+                    min="0"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    placeholder="Montant..."
+                  />
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-green-600 hover:bg-green-700"
+              disabled={!paymentAmount || parseFloat(paymentAmount) <= 0}
+              onClick={() => {
+                if (!onUpdateInvoice) return;
+                const amount = parseFloat(paymentAmount) || 0;
+                const totalPaid = (invoice.paidAmount || 0) + amount;
+                const remaining = invoice.totalAmount - totalPaid;
+                if (remaining <= 0) {
+                  onUpdateInvoice(invoice.id, { status: 'paid', paidAmount: invoice.totalAmount, paidAt: new Date() });
+                } else {
+                  onUpdateInvoice(invoice.id, { paidAmount: totalPaid });
+                }
+                setShowPayDialog(false);
+                setPaymentAmount('');
+              }}
+            >
+              Confirmer le paiement
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
