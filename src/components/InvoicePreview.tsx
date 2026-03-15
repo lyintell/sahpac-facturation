@@ -326,7 +326,7 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
                   <div className="flex items-baseline font-bold text-lg text-orange-600 pt-1">
                     <span className="shrink-0">Reste à payer</span>
                     <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
-                    <span className="shrink-0">{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString("fr-FR")} F</span>
+                    <span className="shrink-0"><span className="shrink-0">{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString("fr-FR")} FCFA</span></span>
                   </div>
                 </>
               )}
