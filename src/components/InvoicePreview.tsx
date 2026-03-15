@@ -357,7 +357,7 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
         </div>
         </div>
       </div>
-    </div>
+
       {/* Payment Dialog */}
       <AlertDialog open={showPayDialog} onOpenChange={(open) => { if (!open) { setShowPayDialog(false); setPaymentAmount(''); } }}>
         <AlertDialogContent onClick={(e) => e.stopPropagation()}>
