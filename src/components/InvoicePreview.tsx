@@ -358,6 +358,58 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
         </div>
       </div>
     </div>
+      {/* Payment Dialog */}
+      <AlertDialog open={showPayDialog} onOpenChange={(open) => { if (!open) { setShowPayDialog(false); setPaymentAmount(''); } }}>
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enregistrer un paiement</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  Facture <strong>{invoice.invoiceNumber}</strong> — Total: <strong>{invoice.totalAmount.toLocaleString('fr-FR')} F</strong>
+                </p>
+                {(invoice.paidAmount || 0) > 0 && (
+                  <p>Déjà payé: <strong>{(invoice.paidAmount || 0).toLocaleString('fr-FR')} F</strong> — Reste: <strong>{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString('fr-FR')} F</strong></p>
+                )}
+                <div className="space-y-1.5">
+                  <Label htmlFor="preview-payment-amount">Montant du paiement (F)</Label>
+                  <Input
+                    id="preview-payment-amount"
+                    type="number"
+                    min="0"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    placeholder="Montant..."
+                  />
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-green-600 hover:bg-green-700"
+              disabled={!paymentAmount || parseFloat(paymentAmount) <= 0}
+              onClick={() => {
+                if (!onUpdateInvoice) return;
+                const amount = parseFloat(paymentAmount) || 0;
+                const totalPaid = (invoice.paidAmount || 0) + amount;
+                const remaining = invoice.totalAmount - totalPaid;
+                if (remaining <= 0) {
+                  onUpdateInvoice(invoice.id, { status: 'paid', paidAmount: invoice.totalAmount, paidAt: new Date() });
+                } else {
+                  onUpdateInvoice(invoice.id, { paidAmount: totalPaid });
+                }
+                setShowPayDialog(false);
+                setPaymentAmount('');
+              }}
+            >
+              Confirmer le paiement
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 };
 
