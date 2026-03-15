@@ -301,19 +301,19 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
               <div className="flex items-baseline">
                 <span className="shrink-0">Soit au forfait</span>
                 <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
-                <span className="font-medium shrink-0">{invoice.amountHT.toLocaleString("fr-FR")} F</span>
+                <span className="font-medium shrink-0"><span className="font-medium shrink-0">{invoice.amountHT.toLocaleString("fr-FR")} FCFA</span></span>
               </div>
               {invoice.tvaRate > 0 && (
                 <div className="flex items-baseline">
                   <span className="shrink-0">TVA {invoice.tvaRate}%</span>
                   <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
-                  <span className="font-medium shrink-0">{invoice.tvaAmount.toLocaleString("fr-FR")} F</span>
+                  <span className="font-medium shrink-0"><span className="font-medium shrink-0">{invoice.tvaAmount.toLocaleString("fr-FR")} FCFA</span></span>
                 </div>
               )}
               <div className="flex items-baseline font-bold text-lg pt-2">
                 <span className="shrink-0">Total{invoice.tvaRate > 0 ? " TTC" : ""}</span>
                 <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
-                <span className="shrink-0">{invoice.totalAmount.toLocaleString("fr-FR")} F</span>
+                <span className="shrink-0"><span className="shrink-0">{invoice.totalAmount.toLocaleString("fr-FR")} FCFA</span></span>
               </div>
               {/* Partial payment info */}
               {!invoice.isProForma && (invoice.paidAmount || 0) > 0 && invoice.status !== 'paid' && (
@@ -321,12 +321,12 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
                   <div className="flex items-baseline pt-1 text-sm">
                     <span className="shrink-0">Montant payé</span>
                     <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
-                    <span className="shrink-0">{(invoice.paidAmount || 0).toLocaleString("fr-FR")} F</span>
+                    <span className="shrink-0"><span className="shrink-0">{(invoice.paidAmount || 0).toLocaleString("fr-FR")} FCFA</span></span>
                   </div>
                   <div className="flex items-baseline font-bold text-lg text-orange-600 pt-1">
                     <span className="shrink-0">Reste à payer</span>
                     <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
-                    <span className="shrink-0">{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString("fr-FR")} F</span>
+                    <span className="shrink-0"><span className="shrink-0">{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString("fr-FR")} FCFA</span></span>
                   </div>
                 </>
               )}
@@ -370,13 +370,13 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
             <AlertDialogDescription asChild>
               <div className="space-y-3">
                 <p>
-                  Facture <strong>{invoice.invoiceNumber}</strong> — Total: <strong>{invoice.totalAmount.toLocaleString('fr-FR')} F</strong>
+                  Facture <strong>{invoice.invoiceNumber}</strong> — Total: <strong>{invoice.totalAmount.toLocaleString('fr-FR')} FCFA</strong>
                 </p>
                 {(invoice.paidAmount || 0) > 0 && (
-                  <p>Déjà payé: <strong>{(invoice.paidAmount || 0).toLocaleString('fr-FR')} F</strong> — Reste: <strong>{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString('fr-FR')} F</strong></p>
+                  <p>Déjà payé: <strong>{(invoice.paidAmount || 0).toLocaleString('fr-FR')} FCFA</strong> — Reste: <strong>{(invoice.totalAmount - (invoice.paidAmount || 0)).toLocaleString('fr-FR')} FCFA</strong></p>
                 )}
                 <div className="space-y-1.5">
-                  <Label htmlFor="preview-payment-amount">Montant du paiement (F)</Label>
+                  <Label htmlFor="preview-payment-amount">Montant du paiement (FCFA)</Label>
                   <Input
                     id="preview-payment-amount"
                     type="number"

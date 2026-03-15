@@ -183,19 +183,19 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
           <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
             <CardContent className="p-3 sm:p-4 text-center">
               <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">Total Facturé</p>
-              <p className="text-sm sm:text-xl font-bold text-blue-700 dark:text-blue-300">{financialStats.totalAmount.toLocaleString('fr-FR')} F</p>
+              <p className="text-sm sm:text-xl font-bold text-blue-700 dark:text-blue-300"><p className="text-sm sm:text-xl font-bold text-blue-700 dark:text-blue-300">{financialStats.totalAmount.toLocaleString('fr-FR')} FCFA</p></p>
             </CardContent>
           </Card>
           <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
             <CardContent className="p-3 sm:p-4 text-center">
               <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">Total Payé</p>
-              <p className="text-sm sm:text-xl font-bold text-green-700 dark:text-green-300">{financialStats.totalPaid.toLocaleString('fr-FR')} F</p>
+              <p className="text-sm sm:text-xl font-bold text-green-700 dark:text-green-300"><p className="text-sm sm:text-xl font-bold text-green-700 dark:text-green-300">{financialStats.totalPaid.toLocaleString('fr-FR')} FCFA</p></p>
             </CardContent>
           </Card>
           <Card className="bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800">
             <CardContent className="p-3 sm:p-4 text-center">
               <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">Reliquats</p>
-              <p className="text-sm sm:text-xl font-bold text-orange-700 dark:text-orange-300">{financialStats.totalRemaining.toLocaleString('fr-FR')} F</p>
+              <p className="text-sm sm:text-xl font-bold text-orange-700 dark:text-orange-300"><p className="text-sm sm:text-xl font-bold text-orange-700 dark:text-orange-300">{financialStats.totalRemaining.toLocaleString('fr-FR')} FCFA</p></p>
             </CardContent>
           </Card>
         </div>
@@ -352,7 +352,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                         </span>
                       </td>
                       <td className="py-3 px-2 text-right font-medium">
-                        {invoice.totalAmount.toLocaleString('fr-FR')} F
+                      <p className="font-bold">{invoice.totalAmount.toLocaleString('fr-FR')} FCFA</p>
                       </td>
                       <td className="py-3 px-2">
                         {invoice.isProForma === false ? (
@@ -366,7 +366,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                                 Partiel
                               </Badge>
                               <span className="text-xs text-muted-foreground">
-                                {(invoice.paidAmount || 0).toLocaleString('fr-FR')} / {invoice.totalAmount.toLocaleString('fr-FR')} F
+                                {(invoice.paidAmount || 0).toLocaleString('fr-FR')} / {invoice.totalAmount.toLocaleString('fr-FR')} FCFA
                               </span>
                             </div>
                           ) : (
@@ -468,7 +468,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                             <div className="flex flex-col items-end gap-0.5">
                               <Badge variant="outline" className="text-orange-600 border-orange-600 text-xs">Partiel</Badge>
                               <span className="text-[10px] text-muted-foreground">
-                                {(invoice.paidAmount || 0).toLocaleString('fr-FR')} / {invoice.totalAmount.toLocaleString('fr-FR')} F
+                                {(invoice.paidAmount || 0).toLocaleString('fr-FR')} / {invoice.totalAmount.toLocaleString('fr-FR')} FCFA
                               </span>
                             </div>
                           ) : (
@@ -554,13 +554,13 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
             <AlertDialogDescription asChild>
               <div className="space-y-3">
                 <p>
-                  Facture <strong>{payInvoice?.invoiceNumber}</strong> — Total: <strong>{payInvoice?.totalAmount.toLocaleString('fr-FR')} F</strong>
+                  Facture <strong>{payInvoice?.invoiceNumber}</strong> — Total: <strong>{payInvoice?.totalAmount.toLocaleString('fr-FR')} FCFA</strong>
                 </p>
                 {(payInvoice?.paidAmount || 0) > 0 && (
-                  <p>Déjà payé: <strong>{(payInvoice?.paidAmount || 0).toLocaleString('fr-FR')} F</strong> — Reste: <strong>{((payInvoice?.totalAmount || 0) - (payInvoice?.paidAmount || 0)).toLocaleString('fr-FR')} F</strong></p>
+                  <p>Déjà payé: <strong>{(payInvoice?.paidAmount || 0).toLocaleString('fr-FR')} FCFA</strong> — Reste: <strong>{((payInvoice?.totalAmount || 0) - (payInvoice?.paidAmount || 0)).toLocaleString('fr-FR')} FCFA</strong></p>
                 )}
                 <div className="space-y-1.5">
-                  <Label htmlFor="payment-amount">Montant du paiement (F)</Label>
+                  <Label htmlFor="payment-amount">Montant du paiement (FCFA)</Label>
                   <Input
                     id="payment-amount"
                     type="number"
