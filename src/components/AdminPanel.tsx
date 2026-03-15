@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Save, X, Bug, MapPin } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, X, Bug, MapPin, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,8 +40,40 @@ const AdminPanel = ({
   const [zoneName, setZoneName] = useState('');
   const [editingZoneId, setEditingZoneId] = useState<string | null>(null);
 
+  // Password form
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const navigate = useNavigate();
+
   const resetItForm = () => { setItName(''); setItDesc(''); setItPrice(''); setEditingItId(null); };
   const resetZoneForm = () => { setZoneName(''); setEditingZoneId(null); };
+
+  const handleChangePassword = useCallback(async () => {
+    if (!currentPassword) { toast.error('Le mot de passe actuel est requis'); return; }
+    if (!newPassword || newPassword.length < 6) { toast.error('Le nouveau mot de passe doit contenir au moins 6 caractères'); return; }
+    if (newPassword !== confirmPassword) { toast.error('Les mots de passe ne correspondent pas'); return; }
+
+    setPasswordLoading(true);
+    // Verify current password by re-signing in
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) { toast.error('Utilisateur non trouvé'); setPasswordLoading(false); return; }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+    if (signInError) { toast.error('Mot de passe actuel incorrect'); setPasswordLoading(false); return; }
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPasswordLoading(false);
+    if (error) { toast.error(error.message); return; }
+
+    toast.success('Mot de passe modifié avec succès');
+    await supabase.auth.signOut();
+    navigate('/auth');
+  }, [currentPassword, newPassword, confirmPassword, navigate]);
 
   const handleSaveIt = useCallback(async () => {
     if (!itName.trim()) { toast.error('Le nom est requis'); return; }
@@ -97,12 +131,15 @@ const AdminPanel = ({
       </div>
 
       <Tabs defaultValue="interventions">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="interventions" className="flex items-center gap-2">
             <Bug className="w-4 h-4" /> Types d'intervention
           </TabsTrigger>
           <TabsTrigger value="zones" className="flex items-center gap-2">
             <MapPin className="w-4 h-4" /> Zones d'intervention
+          </TabsTrigger>
+          <TabsTrigger value="password" className="flex items-center gap-2">
+            <Lock className="w-4 h-4" /> Mot de passe
           </TabsTrigger>
         </TabsList>
 
@@ -264,6 +301,32 @@ const AdminPanel = ({
                   ))}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        {/* Password Tab */}
+        <TabsContent value="password" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Changer le mot de passe</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 max-w-md">
+              <div>
+                <Label>Mot de passe actuel *</Label>
+                <Input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="••••••••" />
+              </div>
+              <div>
+                <Label>Nouveau mot de passe *</Label>
+                <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="••••••••" minLength={6} />
+              </div>
+              <div>
+                <Label>Confirmer le nouveau mot de passe *</Label>
+                <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" minLength={6} />
+              </div>
+              <Button onClick={handleChangePassword} disabled={passwordLoading}>
+                <Save className="w-4 h-4 mr-2" />
+                {passwordLoading ? 'Modification...' : 'Changer le mot de passe'}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
