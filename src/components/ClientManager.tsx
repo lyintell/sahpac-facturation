@@ -232,7 +232,7 @@ const ClientManager = ({ clients, invoices, onAddClient, onDeleteClient, onUpdat
                       </div>
                     )}
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 sm:gap-2 flex-wrap justify-end">
                       {editingId === client.id ? (
                         <>
                           <Button size="sm" variant="ghost" onClick={saveEdit}>
