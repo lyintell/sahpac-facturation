@@ -131,12 +131,15 @@ const AdminPanel = ({
       </div>
 
       <Tabs defaultValue="interventions">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="interventions" className="flex items-center gap-2">
             <Bug className="w-4 h-4" /> Types d'intervention
           </TabsTrigger>
           <TabsTrigger value="zones" className="flex items-center gap-2">
             <MapPin className="w-4 h-4" /> Zones d'intervention
+          </TabsTrigger>
+          <TabsTrigger value="password" className="flex items-center gap-2">
+            <Lock className="w-4 h-4" /> Mot de passe
           </TabsTrigger>
         </TabsList>
 
