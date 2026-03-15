@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Save, X, Bug, MapPin } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, X, Bug, MapPin, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
