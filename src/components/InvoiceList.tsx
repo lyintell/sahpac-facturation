@@ -352,7 +352,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                         </span>
                       </td>
                       <td className="py-3 px-2 text-right font-medium">
-                        {invoice.totalAmount.toLocaleString('fr-FR')} F
+                      <p className="font-bold">{invoice.totalAmount.toLocaleString('fr-FR')} FCFA</p>
                       </td>
                       <td className="py-3 px-2">
                         {invoice.isProForma === false ? (
