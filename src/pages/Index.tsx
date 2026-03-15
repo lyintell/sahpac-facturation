@@ -15,8 +15,8 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<'invoices' | 'clients' | 'new' | 'admin'>('invoices');
   const { clients, loading: clientsLoading, addClient, updateClient, deleteClient } = useClients();
   const { invoices, loading: invoicesLoading, createInvoice, updateInvoice, deleteInvoice, copyInvoice } = useInvoices();
-  const { zones, loading: zonesLoading, addZone } = useZones();
-  const { interventionTypes, loading: interventionTypesLoading, addType: addInterventionType } = useInterventionTypes();
+  const { zones, loading: zonesLoading, addZone, updateZone, deleteZone } = useZones();
+  const { interventionTypes, loading: interventionTypesLoading, addType: addInterventionType, updateType: updateInterventionType, deleteType: deleteInterventionType } = useInterventionTypes();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [preselectedClientId, setPreselectedClientId] = useState<string | null>(null);
