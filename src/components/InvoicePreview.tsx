@@ -195,17 +195,20 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
             onClick={handleExportPDF} 
             variant="secondary"
             size="sm"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs sm:text-sm"
+            className="bg-warning hover:bg-warning/90 text-warning-foreground text-xs sm:text-sm"
             disabled={isExporting}
           >
             <Download className="w-4 h-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">{isExporting ? 'Export...' : 'Exporter PDF'}</span>
             <span className="sm:hidden">PDF</span>
           </Button>
+          {/* Print button hidden per request */}
+          {/*
           <Button onClick={handlePrint} variant="secondary" size="sm" className="bg-warning hover:bg-warning/90 text-warning-foreground text-xs sm:text-sm">
             <Printer className="w-4 h-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Imprimer</span>
           </Button>
+          */}
           <Button variant="outline" onClick={onClose} size="sm" className="bg-card text-xs sm:text-sm">
             <X className="w-4 h-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Fermer</span>
