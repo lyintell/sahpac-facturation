@@ -14,7 +14,7 @@ import { Invoice, ZoneIntervention, InterventionType, Client } from '@/types';
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'invoices' | 'clients' | 'new' | 'admin'>('invoices');
   const { clients, loading: clientsLoading, addClient, updateClient, deleteClient } = useClients();
-  const { invoices, loading: invoicesLoading, createInvoice, updateInvoice, deleteInvoice, copyInvoice } = useInvoices();
+  const { invoices, loading: invoicesLoading, createInvoice, updateInvoice, deleteInvoice, copyInvoice, convertProformaToDefinitive } = useInvoices();
   const { zones, loading: zonesLoading, addZone, updateZone, deleteZone } = useZones();
   const { interventionTypes, loading: interventionTypesLoading, addType: addInterventionType, updateType: updateInterventionType, deleteType: deleteInterventionType } = useInterventionTypes();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -77,6 +77,10 @@ const Index = () => {
     await updateInvoice(id, data);
   }, [updateInvoice]);
 
+  const handleConvertInvoice = useCallback(async (invoice: Invoice) => {
+    await convertProformaToDefinitive(invoice);
+  }, [convertProformaToDefinitive]);
+
   // Map zones to the expected format
   const zonesData: ZoneIntervention[] = zones.map(z => ({ id: z.id, name: z.name }));
   
@@ -113,6 +117,7 @@ const Index = () => {
             onEditInvoice={handleEditInvoice}
             onDeleteInvoice={handleDeleteInvoice}
             onUpdateInvoice={handleUpdateInvoice}
+            onConvertInvoice={handleConvertInvoice}
             onCopyInvoice={handleCopyInvoice}
             onNewInvoice={() => setActiveTab('new')}
           />

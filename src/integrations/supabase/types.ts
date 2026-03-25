@@ -94,6 +94,7 @@ export type Database = {
           observations: string | null
           paid_amount: number
           paid_at: string | null
+          proforma_id: string | null
           status: string | null
           subtotal: number
           total_amount: number
@@ -124,6 +125,7 @@ export type Database = {
           observations?: string | null
           paid_amount?: number
           paid_at?: string | null
+          proforma_id?: string | null
           status?: string | null
           subtotal?: number
           total_amount?: number
@@ -154,6 +156,7 @@ export type Database = {
           observations?: string | null
           paid_amount?: number
           paid_at?: string | null
+          proforma_id?: string | null
           status?: string | null
           subtotal?: number
           total_amount?: number

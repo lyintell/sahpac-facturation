@@ -9,6 +9,7 @@ type DbInvoiceRow = {
   id: string;
   user_id: string;
   invoice_number: string;
+  proforma_id: string | null;
   client_id: string;
   client_name: string;
   client_address: string | null;
@@ -45,6 +46,7 @@ const mapDbToInvoice = (db: DbInvoiceRow): Invoice => {
   return {
     id: db.id,
     invoiceNumber: db.invoice_number,
+    proformaId: db.proforma_id || undefined,
     clientId: db.client_id,
     clientName: db.client_name,
     clientAddress: db.client_address || undefined,
@@ -149,6 +151,7 @@ export const useInvoices = () => {
       observations: invoiceData.observations || null,
       is_pro_forma: isProForma,
       status: invoiceData.status || 'pending',
+      proforma_id: invoiceData.proformaId || null,
       paid_at: invoiceData.paidAt ? (invoiceData.paidAt instanceof Date ? invoiceData.paidAt.toISOString() : String(invoiceData.paidAt)) : null,
     };
     
@@ -171,15 +174,6 @@ export const useInvoices = () => {
   }, [user, generateInvoiceNumber]);
 
   const updateInvoice = useCallback(async (id: string, invoiceData: Partial<Invoice>) => {
-    // If converting from pro forma to definitive, generate new number
-    let newInvoiceNumber: string | undefined;
-    if (invoiceData.isProForma === false) {
-      const existing = invoices.find(inv => inv.id === id);
-      if (existing?.isProForma !== false) {
-        newInvoiceNumber = await generateInvoiceNumber(false);
-      }
-    }
-    
     const dbData: Record<string, unknown> = {};
     if (invoiceData.clientId !== undefined) dbData.client_id = invoiceData.clientId;
     if (invoiceData.clientName !== undefined) dbData.client_name = invoiceData.clientName;
@@ -206,10 +200,10 @@ export const useInvoices = () => {
     if (invoiceData.includeTva !== undefined) dbData.include_tva = invoiceData.includeTva;
     if (invoiceData.observations !== undefined) dbData.observations = invoiceData.observations;
     if (invoiceData.isProForma !== undefined) dbData.is_pro_forma = invoiceData.isProForma;
+    if (invoiceData.proformaId !== undefined) dbData.proforma_id = invoiceData.proformaId;
     if (invoiceData.status !== undefined) dbData.status = invoiceData.status;
     if (invoiceData.paidAmount !== undefined) dbData.paid_amount = invoiceData.paidAmount;
     if (invoiceData.paidAt !== undefined) dbData.paid_at = invoiceData.paidAt instanceof Date ? invoiceData.paidAt.toISOString() : invoiceData.paidAt;
-    if (newInvoiceNumber) dbData.invoice_number = newInvoiceNumber;
     
     const { error } = await supabase
       .from('invoices')
@@ -227,11 +221,10 @@ export const useInvoices = () => {
       return {
         ...inv,
         ...invoiceData,
-        ...(newInvoiceNumber ? { invoiceNumber: newInvoiceNumber } : {}),
       };
     }));
     toast.success('Facture mise à jour');
-  }, [invoices, generateInvoiceNumber]);
+  }, [invoices]);
 
   const deleteInvoice = useCallback(async (id: string) => {
     const { error } = await supabase
@@ -303,5 +296,61 @@ export const useInvoices = () => {
     return newInvoice;
   }, [user, generateInvoiceNumber]);
 
-  return { invoices, loading, createInvoice, updateInvoice, deleteInvoice, copyInvoice, refetch: fetchInvoices };
+  const convertProformaToDefinitive = useCallback(async (proforma: Invoice) => {
+    if (!user) return null;
+    if (proforma.isProForma === false) return proforma;
+
+    const definitiveNumber = await generateInvoiceNumber(false);
+
+    const zoneIds = proforma.zoneIds || proforma.zones?.map(z => z.id) || [];
+    const zoneNames = proforma.zoneNames || proforma.zones?.map(z => z.name) || [];
+
+    const dbData: TablesInsert<'invoices'> & { work_description?: string | null; intervention_description?: string | null; frequency?: string | null; findings?: string | null } = {
+      user_id: user.id,
+      invoice_number: definitiveNumber,
+      proforma_id: proforma.id,
+      client_id: proforma.clientId,
+      client_name: proforma.clientName,
+      client_address: proforma.clientAddress || null,
+      date: new Date().toISOString(),
+      intervention_type_id: proforma.interventionTypeId,
+      intervention_type_name: proforma.interventionTypeName,
+      work_description: proforma.workDescription || null,
+      intervention_description: proforma.interventionDescription || null,
+      frequency: proforma.frequency || null,
+      findings: proforma.findings || null,
+      zone_ids: zoneIds,
+      zone_names: zoneNames,
+      items: (proforma.items || []) as unknown as TablesInsert<'invoices'>['items'],
+      subtotal: proforma.subtotal || proforma.amountHT || 0,
+      tva_rate: proforma.tvaRate,
+      tva_amount: proforma.tvaAmount,
+      total_amount: proforma.totalAmount,
+      include_tva: proforma.includeTva !== false,
+      observations: proforma.observations || null,
+      is_pro_forma: false,
+      status: 'pending',
+      paid_amount: 0,
+      paid_at: null,
+    };
+
+    const { data, error } = await supabase
+      .from('invoices')
+      .insert(dbData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error converting invoice:', error);
+      toast.error('Erreur lors de la conversion en définitive');
+      return null;
+    }
+
+    const newInvoice = mapDbToInvoice(data as DbInvoiceRow);
+    setInvoices(prev => [newInvoice, ...prev]);
+    toast.success(`Facture définitive ${definitiveNumber} créée`);
+    return newInvoice;
+  }, [user, generateInvoiceNumber]);
+
+  return { invoices, loading, createInvoice, updateInvoice, deleteInvoice, copyInvoice, convertProformaToDefinitive, refetch: fetchInvoices };
 };

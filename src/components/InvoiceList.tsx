@@ -29,11 +29,12 @@ interface InvoiceListProps {
   onEditInvoice: (invoice: Invoice) => void;
   onDeleteInvoice: (id: string) => void;
   onUpdateInvoice: (id: string, data: Partial<Invoice>) => void;
+  onConvertInvoice: (invoice: Invoice) => void;
   onCopyInvoice: (invoice: Invoice) => void;
   onNewInvoice: () => void;
 }
 
-const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDeleteInvoice, onUpdateInvoice, onCopyInvoice, onNewInvoice }: InvoiceListProps) => {
+const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDeleteInvoice, onUpdateInvoice, onConvertInvoice, onCopyInvoice, onNewInvoice }: InvoiceListProps) => {
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
   const [convertInvoice, setConvertInvoice] = useState<Invoice | null>(null);
   const [payInvoice, setPayInvoice] = useState<Invoice | null>(null);
@@ -123,7 +124,7 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
 
   const handleConfirmConvert = () => {
     if (convertInvoice) {
-      onUpdateInvoice(convertInvoice.id, { isProForma: false });
+      onConvertInvoice(convertInvoice);
       setConvertInvoice(null);
     }
   };

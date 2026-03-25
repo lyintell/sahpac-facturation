@@ -32,6 +32,7 @@ export type InvoiceStatus = 'pending' | 'paid';
 export interface Invoice {
   id: string;
   invoiceNumber: string;
+  proformaId?: string;
   date: Date;
   clientId: string;
   clientName: string;
