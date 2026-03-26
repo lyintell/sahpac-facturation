@@ -138,6 +138,7 @@ const Index = () => {
         {activeTab === 'new' && (
           <InvoiceForm
             clients={clientsData}
+            invoices={invoices}
             zones={zonesData}
             interventionTypes={interventionTypes}
             editingInvoice={editingInvoice}

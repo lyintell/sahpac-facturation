@@ -84,29 +84,5 @@ export const useZones = () => {
     setZones(prev => prev.filter(z => z.id !== id));
   }, []);
 
-  // Initialize default zones if none exist
-  const initializeDefaultZones = useCallback(async () => {
-    if (!user || zones.length > 0 || loading) return;
-    
-    const defaultZones = [
-      { name: 'Premier local' },
-      { name: 'Petit magasin' },
-      { name: 'Entrepôt' },
-      { name: 'La cour' },
-    ];
-    
-    for (const zone of defaultZones) {
-      await supabase.from('zones').insert({ ...zone, user_id: user.id });
-    }
-    
-    fetchZones();
-  }, [user, zones.length, loading, fetchZones]);
-
-  useEffect(() => {
-    if (!loading && zones.length === 0 && user) {
-      initializeDefaultZones();
-    }
-  }, [loading, zones.length, user, initializeDefaultZones]);
-
   return { zones, loading, addZone, updateZone, deleteZone, refetch: fetchZones };
 };

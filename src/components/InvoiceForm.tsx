@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { Client, Invoice, ZoneIntervention, InterventionType, DEFAULT_TVA_RATE } from '@/types';
 interface InvoiceFormProps {
   clients: Client[];
+  invoices: Invoice[];
   zones: ZoneIntervention[];
   interventionTypes: InterventionType[];
   editingInvoice?: Invoice | null;
@@ -27,7 +28,7 @@ interface InvoiceFormProps {
   onCancelEdit?: () => void;
 }
 
-const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, preselectedClientId, onAddClient, onAddZone, onAddInterventionType, onCreateInvoice, onUpdateInvoice, onCancelEdit }: InvoiceFormProps) => {
+const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoice, preselectedClientId, onAddClient, onAddZone, onAddInterventionType, onCreateInvoice, onUpdateInvoice, onCancelEdit }: InvoiceFormProps) => {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [newClientName, setNewClientName] = useState('');
   const [newClientAddress, setNewClientAddress] = useState('');
@@ -92,6 +93,36 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
   };
 
   const selectedIntervention = interventionTypes.find(t => t.id === selectedInterventionId);
+  const recentZones = useMemo(() => {
+    if (zones.length === 0) {
+      return [];
+    }
+
+    const selectedZoneIds = new Set(selectedZones.map(zone => zone.id));
+    const zonesById = new Map(zones.map(zone => [zone.id, zone]));
+    const recentZoneMap = new Map<string, ZoneIntervention>();
+    const sortedInvoices = [...invoices].sort(
+      (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+    );
+
+    for (const invoice of sortedInvoices) {
+      for (const invoiceZone of invoice.zones) {
+        const zone = zonesById.get(invoiceZone.id);
+
+        if (!zone || selectedZoneIds.has(zone.id) || recentZoneMap.has(zone.id)) {
+          continue;
+        }
+
+        recentZoneMap.set(zone.id, zone);
+
+        if (recentZoneMap.size === 5) {
+          return Array.from(recentZoneMap.values());
+        }
+      }
+    }
+
+    return Array.from(recentZoneMap.values());
+  }, [invoices, selectedZones, zones]);
   
   const tvaAmount = useMemo(() => {
     if (!includeTva) return 0;
@@ -474,12 +505,9 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
             </div>
           </div>
 
-          {zones.length > 0 && !newZoneName.trim() && (
+          {recentZones.length > 0 && !newZoneName.trim() && (
             <div className="flex flex-wrap gap-2">
-              {zones
-                .filter(zone => !selectedZones.find(z => z.id === zone.id))
-                .slice(0, 8)
-                .map(zone => (
+              {recentZones.map(zone => (
                   <Button
                     key={zone.id}
                     variant="outline"
@@ -489,11 +517,6 @@ const InvoiceForm = ({ clients, zones, interventionTypes, editingInvoice, presel
                     {zone.name}
                   </Button>
                 ))}
-              {zones.filter(zone => !selectedZones.find(z => z.id === zone.id)).length > 8 && (
-                <span className="text-sm text-muted-foreground self-center">
-                  +{zones.filter(zone => !selectedZones.find(z => z.id === zone.id)).length - 8} autres...
-                </span>
-              )}
             </div>
           )}
 
