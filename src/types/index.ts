@@ -14,6 +14,14 @@ export interface InterventionType {
   standardPrice: number;
 }
 
+export interface InvoiceIntervention {
+  id: string;
+  name: string;
+  description: string;
+  standardPrice: number;
+  amountHT?: number;
+}
+
 export interface ZoneIntervention {
   id: string;
   name: string;
@@ -41,6 +49,8 @@ export interface Invoice {
   interventionTypeId: string;
   interventionTypeName: string;
   interventionDescription: string;
+  interventions?: InvoiceIntervention[];
+  separateTotalsByInterventionType?: boolean;
   zones: ZoneIntervention[];
   zoneIds?: string[];
   zoneNames?: string[];

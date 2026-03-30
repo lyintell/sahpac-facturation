@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Printer, X, Download, Banknote } from "lucide-react";
+import { Printer, X, Download, Banknote, FileCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,7 @@ interface InvoicePreviewProps {
   invoice: Invoice;
   onClose: () => void;
   onUpdateInvoice?: (id: string, data: Partial<Invoice>) => void;
+  onConvertInvoice?: (invoice: Invoice, includeTva: boolean) => void;
 }
 
 const numberToWords = (num: number): string => {
@@ -118,11 +120,22 @@ const numberToWords = (num: number): string => {
   return words.trim();
 };
 
-const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewProps) => {
+const InvoicePreview = ({ invoice, onClose, onUpdateInvoice, onConvertInvoice }: InvoicePreviewProps) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [showPayDialog, setShowPayDialog] = useState(false);
+  const [showConvertDialog, setShowConvertDialog] = useState(false);
+  const [convertIncludeTva, setConvertIncludeTva] = useState(true);
   const [paymentAmount, setPaymentAmount] = useState('');
+  const interventions = invoice.interventions && invoice.interventions.length > 0
+    ? invoice.interventions
+    : [{
+        id: invoice.interventionTypeId,
+        name: invoice.interventionTypeName,
+        description: invoice.interventionDescription,
+        standardPrice: invoice.amountHT,
+      }];
+  const showSeparatedTotals = invoice.separateTotalsByInterventionType === true && interventions.length > 1;
 
   const handlePrint = () => {
     window.print();
@@ -175,6 +188,21 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
       <div className="min-h-full flex flex-col items-center py-2 sm:py-4 px-2 sm:px-4">
         <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
         <div className="no-print flex flex-wrap justify-end gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+          {invoice.isProForma !== false && onConvertInvoice && (
+            <Button
+              onClick={() => {
+                setConvertIncludeTva(true);
+                setShowConvertDialog(true);
+              }}
+              variant="secondary"
+              size="sm"
+              className="text-xs sm:text-sm"
+            >
+              <FileCheck className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Convertir en facture</span>
+              <span className="sm:hidden">Convertir</span>
+            </Button>
+          )}
           {!invoice.isProForma && invoice.status !== 'paid' && onUpdateInvoice && (
             <Button
               onClick={() => {
@@ -253,11 +281,18 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
 
           {/* Intervention Type */}
           <div className="mb-6">
-            <h3 className="invoice-section-title">TYPE D'INTERVENTION</h3>
-            <p className="mb-2">
-              <span className="font-semibold text-primary underline">{invoice.interventionTypeName.toUpperCase()}</span>{" "}
-              : {invoice.interventionDescription}
-            </p>
+            <h3 className="invoice-section-title">TYPE{interventions.length > 1 ? 'S' : ''} D'INTERVENTION</h3>
+            <div className="space-y-2">
+              {interventions.map((intervention, index) => (
+                <p key={`${intervention.id}-${index}`} className="mb-2">
+                  <span className="font-semibold text-primary underline">{intervention.name.toUpperCase()}</span>{" "}
+                  : {intervention.description}
+                  {intervention.standardPrice > 0 && (
+                    <span className="font-medium"> ({intervention.standardPrice.toLocaleString('fr-FR')} FCFA)</span>
+                  )}
+                </p>
+              ))}
+            </div>
           </div>
 
           {/* Zones */}
@@ -301,10 +336,17 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
           {/* Amounts */}
           <div className="pt-4 mt-6">
             <div className="space-y-2">
+              {showSeparatedTotals && interventions.map((intervention, index) => (
+                <div key={`${intervention.id}-${index}`} className="flex items-baseline font-bold">
+                  <span className="shrink-0">{intervention.name}</span>
+                  <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
+                  <span className="shrink-0">{(intervention.amountHT || 0).toLocaleString("fr-FR")} FCFA</span>
+                </div>
+              ))}
               <div className="flex items-baseline">
-                <span className="shrink-0">Soit au forfait</span>
+                <span className="shrink-0">{showSeparatedTotals ? 'Total HT' : 'Soit au forfait'}</span>
                 <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
-                <span className="font-medium shrink-0"><span className="font-medium shrink-0">{invoice.amountHT.toLocaleString("fr-FR")} FCFA</span></span>
+                <span className="font-medium shrink-0">{invoice.amountHT.toLocaleString("fr-FR")} FCFA</span>
               </div>
               {invoice.tvaRate > 0 && (
                 <div className="flex items-baseline">
@@ -412,6 +454,49 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice }: InvoicePreviewPro
               }}
             >
               Confirmer le paiement
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showConvertDialog} onOpenChange={(open) => {
+        if (!open) {
+          setShowConvertDialog(false);
+          setConvertIncludeTva(true);
+        }
+      }}>
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Convertir en facture définitive</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  Êtes-vous sûr de vouloir convertir la facture pro forma <strong>{invoice.invoiceNumber}</strong> en facture définitive ?
+                  Cette action est irréversible.
+                </p>
+                <div className="flex items-center space-x-3 rounded-lg bg-secondary/40 p-3">
+                  <Switch
+                    id="preview-convert-include-tva"
+                    checked={convertIncludeTva}
+                    onCheckedChange={setConvertIncludeTva}
+                  />
+                  <Label htmlFor="preview-convert-include-tva" className="cursor-pointer">
+                    Ajouter TVA
+                  </Label>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                onConvertInvoice?.(invoice, convertIncludeTva);
+                setShowConvertDialog(false);
+                setConvertIncludeTva(true);
+              }}
+            >
+              Convertir
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

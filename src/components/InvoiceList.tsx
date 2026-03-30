@@ -5,6 +5,7 @@ import { Eye, Trash2, FileText, FileCheck, Search, Edit2, Copy, CalendarIcon, X,
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
@@ -29,7 +30,7 @@ interface InvoiceListProps {
   onEditInvoice: (invoice: Invoice) => void;
   onDeleteInvoice: (id: string) => void;
   onUpdateInvoice: (id: string, data: Partial<Invoice>) => void;
-  onConvertInvoice: (invoice: Invoice) => void;
+  onConvertInvoice: (invoice: Invoice, includeTva: boolean) => void;
   onCopyInvoice: (invoice: Invoice) => void;
   onNewInvoice: () => void;
 }
@@ -37,6 +38,7 @@ interface InvoiceListProps {
 const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDeleteInvoice, onUpdateInvoice, onConvertInvoice, onCopyInvoice, onNewInvoice }: InvoiceListProps) => {
   const [deleteInvoice, setDeleteInvoice] = useState<Invoice | null>(null);
   const [convertInvoice, setConvertInvoice] = useState<Invoice | null>(null);
+  const [convertIncludeTva, setConvertIncludeTva] = useState(true);
   const [payInvoice, setPayInvoice] = useState<Invoice | null>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -124,8 +126,9 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
 
   const handleConfirmConvert = () => {
     if (convertInvoice) {
-      onConvertInvoice(convertInvoice);
+      onConvertInvoice(convertInvoice, convertIncludeTva);
       setConvertInvoice(null);
+      setConvertIncludeTva(true);
     }
   };
 
@@ -349,7 +352,9 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                       <td className="py-3 px-2">{invoice.clientName}</td>
                       <td className="py-3 px-2">
                         <span className="inline-block px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
-                          {invoice.interventionTypeName}
+                          {invoice.interventions && invoice.interventions.length > 1
+                            ? `${invoice.interventions[0].name} +${invoice.interventions.length - 1}`
+                            : invoice.interventionTypeName}
                         </span>
                       </td>
                       <td className="py-3 px-2 text-right font-medium">
@@ -385,7 +390,10 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => setConvertInvoice(invoice)}
+                              onClick={() => {
+                                setConvertInvoice(invoice);
+                                setConvertIncludeTva(true);
+                              }}
                               title="Convertir en facture définitive"
                             >
                               <FileCheck className="w-4 h-4" />
@@ -481,7 +489,10 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
                   </div>
                   <div className="flex justify-end gap-1 border-t pt-2">
                     {invoice.isProForma !== false && (
-                      <Button size="sm" variant="ghost" onClick={() => setConvertInvoice(invoice)} className="h-8 w-8 p-0">
+                      <Button size="sm" variant="ghost" onClick={() => {
+                        setConvertInvoice(invoice);
+                        setConvertIncludeTva(true);
+                      }} className="h-8 w-8 p-0">
                         <FileCheck className="w-4 h-4" />
                       </Button>
                     )}
@@ -530,13 +541,32 @@ const InvoiceList = ({ invoices, clients, onViewInvoice, onEditInvoice, onDelete
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!convertInvoice} onOpenChange={(open) => !open && setConvertInvoice(null)}>
+      <AlertDialog open={!!convertInvoice} onOpenChange={(open) => {
+        if (!open) {
+          setConvertInvoice(null);
+          setConvertIncludeTva(true);
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Convertir en facture définitive</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir convertir la facture pro forma <strong>{convertInvoice?.invoiceNumber}</strong> en facture définitive ?
-              Cette action est irréversible.
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  Êtes-vous sûr de vouloir convertir la facture pro forma <strong>{convertInvoice?.invoiceNumber}</strong> en facture définitive ?
+                  Cette action est irréversible.
+                </p>
+                <div className="flex items-center space-x-3 rounded-lg bg-secondary/40 p-3">
+                  <Switch
+                    id="convert-include-tva"
+                    checked={convertIncludeTva}
+                    onCheckedChange={setConvertIncludeTva}
+                  />
+                  <Label htmlFor="convert-include-tva" className="cursor-pointer">
+                    Ajouter TVA
+                  </Label>
+                </div>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

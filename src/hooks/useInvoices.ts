@@ -2,8 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { Invoice, InvoiceItem, ZoneIntervention } from '@/types';
+import { DEFAULT_TVA_RATE, Invoice, InvoiceIntervention, InvoiceItem, ZoneIntervention } from '@/types';
 import { TablesInsert } from '@/integrations/supabase/types';
+
+type SerializedInterventionsPayload = {
+  version: 1;
+  interventions: InvoiceIntervention[];
+  separateTotalsByInterventionType?: boolean;
+};
 
 type DbInvoiceRow = {
   id: string;
@@ -37,11 +43,120 @@ type DbInvoiceRow = {
   updated_at: string;
 };
 
+const serializeInterventions = (
+  interventions: InvoiceIntervention[],
+  separateTotalsByInterventionType = false
+) => {
+  const payload: SerializedInterventionsPayload = {
+    version: 1,
+    interventions,
+    separateTotalsByInterventionType,
+  };
+
+  return JSON.stringify(payload);
+};
+
+const getInterventionSummary = (interventions: InvoiceIntervention[], fallback = '') => {
+  if (interventions.length === 0) {
+    return fallback;
+  }
+
+  return interventions.map((intervention) => intervention.name).join(' + ');
+};
+
+const getInterventionDescriptionSummary = (interventions: InvoiceIntervention[], fallback = '') => {
+  if (interventions.length === 0) {
+    return fallback;
+  }
+
+  if (interventions.length === 1) {
+    return interventions[0].description;
+  }
+
+  return interventions
+    .map((intervention) => `${intervention.name}: ${intervention.description}`)
+    .join('\n');
+};
+
+const parseInterventions = (db: DbInvoiceRow) => {
+  if (db.intervention_description) {
+    try {
+      const payload = JSON.parse(db.intervention_description) as Partial<SerializedInterventionsPayload>;
+
+      if (Array.isArray(payload.interventions)) {
+        return {
+          interventions: payload.interventions
+            .filter((intervention) => intervention && typeof intervention.id === 'string')
+            .map((intervention) => ({
+              id: intervention.id,
+              name: intervention.name || db.intervention_type_name,
+              description: intervention.description || '',
+              standardPrice: Number(intervention.standardPrice) || 0,
+              amountHT: intervention.amountHT !== undefined ? Number(intervention.amountHT) || 0 : undefined,
+            })),
+          separateTotalsByInterventionType: payload.separateTotalsByInterventionType === true,
+        };
+      }
+    } catch {
+      // Older invoices store plain text descriptions, which are handled below.
+    }
+  }
+
+  if (!db.intervention_type_id && !db.intervention_type_name && !db.intervention_description) {
+    return {
+      interventions: [],
+      separateTotalsByInterventionType: false,
+    };
+  }
+
+  return {
+    interventions: [
+      {
+        id: db.intervention_type_id,
+        name: db.intervention_type_name,
+        description: db.intervention_description || '',
+        standardPrice: Number(db.subtotal) || 0,
+      },
+    ],
+    separateTotalsByInterventionType: false,
+  };
+};
+
+const normalizeInterventions = (
+  invoiceData: Partial<Invoice> | Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>
+) => {
+  if (invoiceData.interventions && invoiceData.interventions.length > 0) {
+    return invoiceData.interventions.map((intervention) => ({
+      id: intervention.id,
+      name: intervention.name,
+      description: intervention.description,
+      standardPrice: Number(intervention.standardPrice) || 0,
+      amountHT: intervention.amountHT !== undefined ? Number(intervention.amountHT) || 0 : undefined,
+    }));
+  }
+
+  if (!invoiceData.interventionTypeId && !invoiceData.interventionTypeName && !invoiceData.interventionDescription) {
+    return [];
+  }
+
+  return [
+    {
+      id: invoiceData.interventionTypeId || '',
+      name: invoiceData.interventionTypeName || '',
+      description: invoiceData.interventionDescription || '',
+      standardPrice: Number(invoiceData.amountHT ?? invoiceData.subtotal) || 0,
+      amountHT: invoiceData.amountHT !== undefined ? Number(invoiceData.amountHT) || 0 : undefined,
+    },
+  ];
+};
+
 const mapDbToInvoice = (db: DbInvoiceRow): Invoice => {
   const zones: ZoneIntervention[] = (db.zone_ids || []).map((id, i) => ({
     id,
     name: db.zone_names?.[i] || '',
   }));
+  const { interventions, separateTotalsByInterventionType } = parseInterventions(db);
+  const primaryIntervention = interventions[0];
   
   return {
     id: db.id,
@@ -51,9 +166,11 @@ const mapDbToInvoice = (db: DbInvoiceRow): Invoice => {
     clientName: db.client_name,
     clientAddress: db.client_address || undefined,
     date: new Date(db.date),
-    interventionTypeId: db.intervention_type_id,
-    interventionTypeName: db.intervention_type_name,
-    interventionDescription: db.intervention_description || '',
+    interventionTypeId: primaryIntervention?.id || db.intervention_type_id,
+    interventionTypeName: getInterventionSummary(interventions, db.intervention_type_name),
+    interventionDescription: getInterventionDescriptionSummary(interventions, db.intervention_description || ''),
+    interventions,
+    separateTotalsByInterventionType,
     workDescription: db.work_description || '',
     frequency: db.frequency || '',
     findings: db.findings || '',
@@ -123,6 +240,7 @@ export const useInvoices = () => {
     
     const isProForma = invoiceData.isProForma !== false;
     const invoiceNumber = await generateInvoiceNumber(isProForma);
+    const interventions = normalizeInterventions(invoiceData);
     
     const zoneIds = invoiceData.zoneIds || invoiceData.zones?.map(z => z.id) || [];
     const zoneNames = invoiceData.zoneNames || invoiceData.zones?.map(z => z.name) || [];
@@ -134,10 +252,12 @@ export const useInvoices = () => {
       client_name: invoiceData.clientName,
       client_address: invoiceData.clientAddress || null,
       date: invoiceData.date instanceof Date ? invoiceData.date.toISOString() : String(invoiceData.date),
-      intervention_type_id: invoiceData.interventionTypeId,
-      intervention_type_name: invoiceData.interventionTypeName,
+      intervention_type_id: interventions[0]?.id || invoiceData.interventionTypeId,
+      intervention_type_name: getInterventionSummary(interventions, invoiceData.interventionTypeName),
       work_description: invoiceData.workDescription || null,
-      intervention_description: invoiceData.interventionDescription || null,
+      intervention_description: interventions.length > 0
+        ? serializeInterventions(interventions, invoiceData.separateTotalsByInterventionType === true)
+        : invoiceData.interventionDescription || null,
       frequency: invoiceData.frequency || null,
       findings: invoiceData.findings || null,
       zone_ids: zoneIds,
@@ -175,6 +295,7 @@ export const useInvoices = () => {
 
   const updateInvoice = useCallback(async (id: string, invoiceData: Partial<Invoice>) => {
     const dbData: Record<string, unknown> = {};
+    const interventions = invoiceData.interventions !== undefined ? normalizeInterventions(invoiceData) : [];
     if (invoiceData.clientId !== undefined) dbData.client_id = invoiceData.clientId;
     if (invoiceData.clientName !== undefined) dbData.client_name = invoiceData.clientName;
     if (invoiceData.clientAddress !== undefined) dbData.client_address = invoiceData.clientAddress;
@@ -183,6 +304,13 @@ export const useInvoices = () => {
     if (invoiceData.interventionTypeName !== undefined) dbData.intervention_type_name = invoiceData.interventionTypeName;
     if (invoiceData.workDescription !== undefined) dbData.work_description = invoiceData.workDescription;
     if (invoiceData.interventionDescription !== undefined) dbData.intervention_description = invoiceData.interventionDescription;
+    if (invoiceData.interventions !== undefined) {
+      dbData.intervention_type_id = interventions[0]?.id || '';
+      dbData.intervention_type_name = getInterventionSummary(interventions);
+      dbData.intervention_description = interventions.length > 0
+        ? serializeInterventions(interventions, invoiceData.separateTotalsByInterventionType === true)
+        : null;
+    }
     if (invoiceData.frequency !== undefined) dbData.frequency = invoiceData.frequency;
     if (invoiceData.findings !== undefined) dbData.findings = invoiceData.findings;
     if (invoiceData.zoneIds !== undefined) dbData.zone_ids = invoiceData.zoneIds;
@@ -218,6 +346,19 @@ export const useInvoices = () => {
     
     setInvoices(prev => prev.map(inv => {
       if (inv.id !== id) return inv;
+
+      if (invoiceData.interventions !== undefined) {
+        return {
+          ...inv,
+          ...invoiceData,
+          interventions,
+          separateTotalsByInterventionType: invoiceData.separateTotalsByInterventionType ?? inv.separateTotalsByInterventionType,
+          interventionTypeId: interventions[0]?.id || '',
+          interventionTypeName: getInterventionSummary(interventions),
+          interventionDescription: getInterventionDescriptionSummary(interventions),
+        };
+      }
+
       return {
         ...inv,
         ...invoiceData,
@@ -248,6 +389,8 @@ export const useInvoices = () => {
     
     if (!user) return null;
     
+    const interventions = normalizeInterventions(invoice);
+    
     const zoneIds = invoice.zoneIds || invoice.zones?.map(z => z.id) || [];
     const zoneNames = invoice.zoneNames || invoice.zones?.map(z => z.name) || [];
     
@@ -258,10 +401,12 @@ export const useInvoices = () => {
       client_name: invoice.clientName,
       client_address: invoice.clientAddress || null,
       date: new Date().toISOString(),
-      intervention_type_id: invoice.interventionTypeId,
-      intervention_type_name: invoice.interventionTypeName,
+      intervention_type_id: interventions[0]?.id || invoice.interventionTypeId,
+      intervention_type_name: getInterventionSummary(interventions, invoice.interventionTypeName),
       work_description: invoice.workDescription || null,
-      intervention_description: invoice.interventionDescription || null,
+      intervention_description: interventions.length > 0
+        ? serializeInterventions(interventions, invoice.separateTotalsByInterventionType === true)
+        : invoice.interventionDescription || null,
       frequency: invoice.frequency || null,
       findings: invoice.findings || null,
       zone_ids: zoneIds,
@@ -296,11 +441,16 @@ export const useInvoices = () => {
     return newInvoice;
   }, [user, generateInvoiceNumber]);
 
-  const convertProformaToDefinitive = useCallback(async (proforma: Invoice) => {
+  const convertProformaToDefinitive = useCallback(async (proforma: Invoice, includeTva = true) => {
     if (!user) return null;
     if (proforma.isProForma === false) return proforma;
 
     const definitiveNumber = await generateInvoiceNumber(false);
+    const interventions = normalizeInterventions(proforma);
+    const subtotal = proforma.subtotal || proforma.amountHT || 0;
+    const tvaRate = includeTva ? DEFAULT_TVA_RATE : 0;
+    const tvaAmount = includeTva ? subtotal * (tvaRate / 100) : 0;
+    const totalAmount = subtotal + tvaAmount;
 
     const zoneIds = proforma.zoneIds || proforma.zones?.map(z => z.id) || [];
     const zoneNames = proforma.zoneNames || proforma.zones?.map(z => z.name) || [];
@@ -313,20 +463,22 @@ export const useInvoices = () => {
       client_name: proforma.clientName,
       client_address: proforma.clientAddress || null,
       date: new Date().toISOString(),
-      intervention_type_id: proforma.interventionTypeId,
-      intervention_type_name: proforma.interventionTypeName,
+      intervention_type_id: interventions[0]?.id || proforma.interventionTypeId,
+      intervention_type_name: getInterventionSummary(interventions, proforma.interventionTypeName),
       work_description: proforma.workDescription || null,
-      intervention_description: proforma.interventionDescription || null,
+      intervention_description: interventions.length > 0
+        ? serializeInterventions(interventions, proforma.separateTotalsByInterventionType === true)
+        : proforma.interventionDescription || null,
       frequency: proforma.frequency || null,
       findings: proforma.findings || null,
       zone_ids: zoneIds,
       zone_names: zoneNames,
       items: (proforma.items || []) as unknown as TablesInsert<'invoices'>['items'],
-      subtotal: proforma.subtotal || proforma.amountHT || 0,
-      tva_rate: proforma.tvaRate,
-      tva_amount: proforma.tvaAmount,
-      total_amount: proforma.totalAmount,
-      include_tva: proforma.includeTva !== false,
+      subtotal,
+      tva_rate: tvaRate,
+      tva_amount: tvaAmount,
+      total_amount: totalAmount,
+      include_tva: includeTva,
       observations: proforma.observations || null,
       is_pro_forma: false,
       status: 'pending',

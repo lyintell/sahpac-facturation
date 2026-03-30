@@ -12,7 +12,26 @@ import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { Client, Invoice, ZoneIntervention, InterventionType, DEFAULT_TVA_RATE } from '@/types';
+import { Client, Invoice, InvoiceIntervention, ZoneIntervention, InterventionType, DEFAULT_TVA_RATE } from '@/types';
+
+type InterventionSelection = {
+  id: string;
+  description: string;
+  amountHT: string;
+};
+
+const createEmptyInterventionSelection = (): InterventionSelection => ({
+  id: '',
+  description: '',
+  amountHT: '',
+});
+
+const ensureInterventionSlots = (interventions: InterventionSelection[]) => {
+  const selectedInterventions = interventions.filter((intervention) => intervention.id);
+
+  return [...selectedInterventions, createEmptyInterventionSelection()];
+};
+
 interface InvoiceFormProps {
   clients: Client[];
   invoices: Invoice[];
@@ -36,9 +55,9 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
   const [showNewClient, setShowNewClient] = useState(false);
   
   const [workDescription, setWorkDescription] = useState('');
-  const [selectedInterventionId, setSelectedInterventionId] = useState('');
-  const [customInterventionDesc, setCustomInterventionDesc] = useState('');
+  const [selectedInterventions, setSelectedInterventions] = useState<InterventionSelection[]>([createEmptyInterventionSelection()]);
   const [showNewIntervention, setShowNewIntervention] = useState(false);
+  const [newInterventionTargetIndex, setNewInterventionTargetIndex] = useState<number | null>(null);
   const [newInterventionName, setNewInterventionName] = useState('');
   const [newInterventionDesc, setNewInterventionDesc] = useState('');
   const [newInterventionPrice, setNewInterventionPrice] = useState('');
@@ -52,22 +71,48 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
   const [amountHT, setAmountHT] = useState('');
   const [tvaRate] = useState(DEFAULT_TVA_RATE);
   const [includeTva, setIncludeTva] = useState(false);
+  const [separateTotalsByInterventionType, setSeparateTotalsByInterventionType] = useState(false);
   const [isProForma, setIsProForma] = useState(true);
   const [observations, setObservations] = useState('');
   const [invoiceDate, setInvoiceDate] = useState<Date>(new Date());
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [isAmountManuallyEdited, setIsAmountManuallyEdited] = useState(false);
 
   // Load editing invoice data or preselected client
   useEffect(() => {
     if (editingInvoice) {
+      const invoiceInterventions = editingInvoice.interventions && editingInvoice.interventions.length > 0
+        ? editingInvoice.interventions
+        : [{
+            id: editingInvoice.interventionTypeId,
+            name: editingInvoice.interventionTypeName,
+            description: editingInvoice.interventionDescription,
+            standardPrice: editingInvoice.amountHT,
+          }];
+      const defaultInterventionAmount = invoiceInterventions.reduce(
+        (total, intervention) => total + (intervention.standardPrice || 0),
+        0
+      );
+
       setSelectedClientId(editingInvoice.clientId);
       setWorkDescription(editingInvoice.workDescription);
-      setSelectedInterventionId(editingInvoice.interventionTypeId);
-      setCustomInterventionDesc(editingInvoice.interventionDescription);
+      setSelectedInterventions(
+        ensureInterventionSlots(
+          invoiceInterventions.map((intervention) => ({
+            id: intervention.id,
+            description: intervention.description,
+            amountHT: intervention.amountHT !== undefined
+              ? intervention.amountHT.toString()
+              : (intervention.standardPrice || 0).toString(),
+          }))
+        )
+      );
       setSelectedZones(editingInvoice.zones);
       setFrequency(editingInvoice.frequency);
       setFindings(editingInvoice.findings);
       setAmountHT(editingInvoice.amountHT.toString());
+      setSeparateTotalsByInterventionType(editingInvoice.separateTotalsByInterventionType === true);
+      setIsAmountManuallyEdited(defaultInterventionAmount !== editingInvoice.amountHT);
       setIncludeTva(editingInvoice.tvaRate > 0);
       setIsProForma(editingInvoice.isProForma !== false);
       setObservations(editingInvoice.observations || '');
@@ -80,19 +125,43 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
   const resetForm = () => {
     setSelectedClientId('');
     setWorkDescription('');
-    setSelectedInterventionId('');
-    setCustomInterventionDesc('');
+    setSelectedInterventions([createEmptyInterventionSelection()]);
     setSelectedZones([]);
     setFrequency('');
     setFindings('');
     setAmountHT('');
+    setSeparateTotalsByInterventionType(false);
+    setIsAmountManuallyEdited(false);
     setIsProForma(true);
     setIncludeTva(true);
     setObservations('');
     setInvoiceDate(new Date());
   };
 
-  const selectedIntervention = interventionTypes.find(t => t.id === selectedInterventionId);
+  const activeInterventions = useMemo<InvoiceIntervention[]>(() => {
+    return selectedInterventions
+      .filter((intervention) => intervention.id)
+      .map((intervention) => {
+        const interventionType = interventionTypes.find((type) => type.id === intervention.id);
+
+        return {
+          id: intervention.id,
+          name: interventionType?.name || '',
+          description: intervention.description || interventionType?.description || '',
+          standardPrice: interventionType?.standardPrice || 0,
+          amountHT: intervention.amountHT.trim() !== ''
+            ? Number(intervention.amountHT) || 0
+            : interventionType?.standardPrice || 0,
+        };
+      })
+      .filter((intervention) => intervention.name);
+  }, [selectedInterventions, interventionTypes]);
+  const defaultAmountHT = useMemo(() => {
+    return activeInterventions.reduce((total, intervention) => total + intervention.standardPrice, 0);
+  }, [activeInterventions]);
+  const separatedAmountHT = useMemo(() => {
+    return activeInterventions.reduce((total, intervention) => total + (intervention.amountHT || 0), 0);
+  }, [activeInterventions]);
   const recentZones = useMemo(() => {
     if (zones.length === 0) {
       return [];
@@ -123,6 +192,83 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
 
     return Array.from(recentZoneMap.values());
   }, [invoices, selectedZones, zones]);
+
+  useEffect(() => {
+    if (!separateTotalsByInterventionType && !isAmountManuallyEdited) {
+      setAmountHT(defaultAmountHT > 0 ? defaultAmountHT.toString() : '');
+    }
+  }, [defaultAmountHT, isAmountManuallyEdited, separateTotalsByInterventionType]);
+
+  useEffect(() => {
+    if (separateTotalsByInterventionType) {
+      setAmountHT(separatedAmountHT > 0 ? separatedAmountHT.toString() : '');
+    }
+  }, [separateTotalsByInterventionType, separatedAmountHT]);
+
+  useEffect(() => {
+    if (activeInterventions.length <= 1 && separateTotalsByInterventionType) {
+      setSeparateTotalsByInterventionType(false);
+    }
+  }, [activeInterventions.length, separateTotalsByInterventionType]);
+
+  const handleSelectIntervention = (index: number, value: string) => {
+    const interventionType = interventionTypes.find((type) => type.id === value);
+
+    setSelectedInterventions((currentInterventions) => {
+      const nextInterventions = [...currentInterventions];
+      nextInterventions[index] = {
+        id: value,
+        description: interventionType?.description || '',
+        amountHT: (interventionType?.standardPrice || 0).toString(),
+      };
+
+      return ensureInterventionSlots(nextInterventions);
+    });
+  };
+
+  const handleInterventionDescriptionChange = (index: number, description: string) => {
+    setSelectedInterventions((currentInterventions) => {
+      const nextInterventions = [...currentInterventions];
+      nextInterventions[index] = {
+        ...nextInterventions[index],
+        description,
+      };
+
+      return nextInterventions;
+    });
+  };
+
+  const handleRemoveIntervention = (index: number) => {
+    setSelectedInterventions((currentInterventions) => {
+      const nextInterventions = currentInterventions.filter((_, currentIndex) => currentIndex !== index);
+
+      return ensureInterventionSlots(nextInterventions);
+    });
+  };
+
+  const handleInterventionAmountChange = (index: number, nextAmount: string) => {
+    setSelectedInterventions((currentInterventions) => {
+      const nextInterventions = [...currentInterventions];
+      nextInterventions[index] = {
+        ...nextInterventions[index],
+        amountHT: nextAmount,
+      };
+
+      return nextInterventions;
+    });
+  };
+
+  const handleToggleSeparateTotals = (checked: boolean) => {
+    setSeparateTotalsByInterventionType(checked);
+
+    if (checked) {
+      setAmountHT(separatedAmountHT > 0 ? separatedAmountHT.toString() : '');
+      return;
+    }
+
+    setAmountHT(separatedAmountHT > 0 ? separatedAmountHT.toString() : '');
+    setIsAmountManuallyEdited(true);
+  };
   
   const tvaAmount = useMemo(() => {
     if (!includeTva) return 0;
@@ -169,16 +315,20 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
 
   const handleSubmit = () => {
     const client = clients.find(c => c.id === selectedClientId);
-    if (!client || !selectedIntervention) return;
+    if (!client || activeInterventions.length === 0) return;
 
     const invoiceData = {
       date: invoiceDate,
       clientId: client.id,
       clientName: client.name,
       workDescription,
-      interventionTypeId: selectedIntervention.id,
-      interventionTypeName: selectedIntervention.name,
-      interventionDescription: customInterventionDesc || selectedIntervention.description,
+      interventionTypeId: activeInterventions[0].id,
+      interventionTypeName: activeInterventions.map((intervention) => intervention.name).join(' + '),
+      interventionDescription: activeInterventions.length === 1
+        ? activeInterventions[0].description
+        : activeInterventions.map((intervention) => `${intervention.name}: ${intervention.description}`).join('\n'),
+      interventions: activeInterventions,
+      separateTotalsByInterventionType,
       zones: selectedZones,
       frequency,
       findings,
@@ -207,7 +357,7 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
     onCancelEdit?.();
   };
 
-  const isValid = selectedClientId && selectedInterventionId && workDescription && parseFloat(amountHT) > 0;
+  const isValid = selectedClientId && activeInterventions.length > 0 && workDescription && parseFloat(amountHT) > 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -348,39 +498,75 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
           <CardTitle>Type d'Intervention</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Type</Label>
-            <Select value={selectedInterventionId} onValueChange={(value) => {
-              if (value === '__new_intervention__') {
-                setShowNewIntervention(true);
-                setSelectedInterventionId('');
-              } else {
-                setSelectedInterventionId(value);
-                setShowNewIntervention(false);
-                const intervention = interventionTypes.find(t => t.id === value);
-                if (intervention) {
-                  setCustomInterventionDesc(intervention.description);
-                  if (intervention.standardPrice > 0) {
-                    setAmountHT(intervention.standardPrice.toString());
-                  }
-                }
-              }
-            }}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un type d'intervention" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__new_intervention__" className="font-bold text-orange-500 focus:text-orange-500">
-                  NOUVEAU TYPE D'INTERVENTION
-                </SelectItem>
-                {interventionTypes.map(type => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {selectedInterventions.map((selection, index) => {
+            const selectedInterventionIds = new Set(
+              selectedInterventions
+                .filter((intervention) => intervention.id)
+                .map((intervention) => intervention.id)
+            );
+            const selectedType = interventionTypes.find((type) => type.id === selection.id);
+            const canRemoveIntervention = selectedInterventions.filter((intervention) => intervention.id).length > 1 && !!selection.id;
+
+            return (
+              <div key={`${selection.id || 'new'}-${index}`} className="space-y-3">
+                <div className="space-y-2">
+                  <Label>{index === 0 ? "Type" : `Type ${index + 1}`}</Label>
+                  <div className="flex gap-2">
+                    <Select
+                      value={selection.id}
+                      onValueChange={(value) => {
+                        if (value === '__new_intervention__') {
+                          setNewInterventionTargetIndex(index);
+                          setShowNewIntervention(true);
+                          return;
+                        }
+
+                        handleSelectIntervention(index, value);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un type d'intervention" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__new_intervention__" className="font-bold text-orange-500 focus:text-orange-500">
+                          NOUVEAU TYPE D'INTERVENTION
+                        </SelectItem>
+                        {interventionTypes
+                          .filter((type) => !selectedInterventionIds.has(type.id) || type.id === selection.id)
+                          .map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    {canRemoveIntervention && (
+                      <Button type="button" variant="outline" size="icon" onClick={() => handleRemoveIntervention(index)}>
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {selection.id && selectedType && (
+                  <div className="space-y-2 rounded-lg bg-secondary/40 p-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium text-muted-foreground">Prix standard</span>
+                      <span className="font-semibold">{selectedType.standardPrice.toLocaleString('fr-FR')} FCFA</span>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description de l'intervention</Label>
+                      <Textarea
+                        value={selection.description}
+                        onChange={(e) => handleInterventionDescriptionChange(index, e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
           {showNewIntervention && (
             <div className="flex flex-col gap-3 p-4 bg-secondary/50 rounded-lg">
@@ -407,19 +593,16 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
               <div className="flex gap-2 justify-end">
                 <Button
                   onClick={async () => {
-                    if (newInterventionName.trim() && newInterventionPrice.trim()) {
+                    if (newInterventionName.trim() && newInterventionPrice.trim() && newInterventionTargetIndex !== null) {
                       const saved = await onAddInterventionType({
                         name: newInterventionName.trim(),
                         description: newInterventionDesc.trim(),
                         standardPrice: parseFloat(newInterventionPrice) || 0,
                       });
                       if (saved) {
-                        setSelectedInterventionId(saved.id);
-                        setCustomInterventionDesc(saved.description);
-                        if (saved.standardPrice > 0) {
-                          setAmountHT(saved.standardPrice.toString());
-                        }
+                        handleSelectIntervention(newInterventionTargetIndex, saved.id);
                         setShowNewIntervention(false);
+                        setNewInterventionTargetIndex(null);
                         setNewInterventionName('');
                         setNewInterventionDesc('');
                         setNewInterventionPrice('');
@@ -431,21 +614,16 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
                 </Button>
-                <Button variant="ghost" onClick={() => setShowNewIntervention(false)}>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setShowNewIntervention(false);
+                    setNewInterventionTargetIndex(null);
+                  }}
+                >
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-            </div>
-          )}
-
-          {selectedIntervention && !showNewIntervention && (
-            <div className="space-y-2">
-              <Label>Description de l'intervention</Label>
-              <Textarea
-                value={customInterventionDesc}
-                onChange={(e) => setCustomInterventionDesc(e.target.value)}
-                rows={4}
-              />
             </div>
           )}
         </CardContent>
@@ -597,16 +775,61 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
                 Appliquer la TVA ({tvaRate}%)
               </Label>
             </div>
+            {activeInterventions.length > 1 && (
+              <div className="flex items-center space-x-3">
+                <Switch
+                  id="split-intervention-totals"
+                  checked={separateTotalsByInterventionType}
+                  onCheckedChange={handleToggleSeparateTotals}
+                />
+                <Label htmlFor="split-intervention-totals" className="cursor-pointer">
+                  Total par type d'intervention
+                </Label>
+              </div>
+            )}
           </div>
+
+          {separateTotalsByInterventionType && activeInterventions.length > 1 && (
+            <div className="space-y-3 rounded-lg bg-secondary/40 p-4">
+              <p className="text-sm font-medium text-muted-foreground">
+                Définissez le montant HT de chaque type. Le montant global sera recalculé automatiquement.
+              </p>
+              <div className="space-y-3">
+                {activeInterventions.map((intervention, index) => (
+                  <div key={`${intervention.id}-${index}`} className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-3 items-end">
+                    <div>
+                      <p className="font-medium text-primary">{intervention.name}</p>
+                      <p className="text-sm text-muted-foreground">Prix standard: {intervention.standardPrice.toLocaleString('fr-FR')} FCFA</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Total HT</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={selectedInterventions[index]?.amountHT || ''}
+                        onChange={(e) => handleInterventionAmountChange(index, e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>Montant HT (FCFA)</Label>
+              <Label>{separateTotalsByInterventionType ? 'Montant HT global (FCFA)' : 'Montant HT (FCFA)'}</Label>
               <Input
                 type="number"
                 placeholder="0"
                 value={amountHT}
-                onChange={(e) => setAmountHT(e.target.value)}
+                disabled={separateTotalsByInterventionType}
+                className={separateTotalsByInterventionType ? 'bg-muted font-medium' : undefined}
+                onChange={(e) => {
+                  setAmountHT(e.target.value);
+                  setIsAmountManuallyEdited(true);
+                }}
               />
             </div>
 

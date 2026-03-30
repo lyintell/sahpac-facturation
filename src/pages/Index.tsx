@@ -77,8 +77,12 @@ const Index = () => {
     await updateInvoice(id, data);
   }, [updateInvoice]);
 
-  const handleConvertInvoice = useCallback(async (invoice: Invoice) => {
-    await convertProformaToDefinitive(invoice);
+  const handleConvertInvoice = useCallback(async (invoice: Invoice, includeTva: boolean) => {
+    const newInvoice = await convertProformaToDefinitive(invoice, includeTva);
+    if (newInvoice) {
+      setSelectedInvoice(newInvoice);
+      setActiveTab('invoices');
+    }
   }, [convertProformaToDefinitive]);
 
   // Map zones to the expected format
@@ -172,6 +176,7 @@ const Index = () => {
           invoice={selectedInvoice}
           onClose={() => setSelectedInvoice(null)}
           onUpdateInvoice={handleUpdateInvoice}
+          onConvertInvoice={handleConvertInvoice}
         />
       )}
     </div>
