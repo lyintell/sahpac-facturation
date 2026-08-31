@@ -148,6 +148,12 @@
 }
 
 @media print {
+  #app-logo-badge {
+    display: none !important;
+  }
+}
+
+@media print {
   @page {
     margin: 0;
   }
