@@ -287,9 +287,6 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice, onConvertInvoice }:
                 <p key={`${intervention.id}-${index}`} className="mb-2">
                   <span className="font-semibold text-primary underline">{intervention.name.toUpperCase()}</span>{" "}
                   : {intervention.description}
-                  {intervention.standardPrice > 0 && (
-                    <span className="font-medium"> ({intervention.standardPrice.toLocaleString('fr-FR')} FCFA)</span>
-                  )}
                 </p>
               ))}
             </div>
@@ -337,16 +334,16 @@ const InvoicePreview = ({ invoice, onClose, onUpdateInvoice, onConvertInvoice }:
           <div className="pt-4 mt-6">
             <div className="space-y-2">
               {showSeparatedTotals && interventions.map((intervention, index) => (
-                <div key={`${intervention.id}-${index}`} className="flex items-baseline font-bold">
+                <div key={`${intervention.id}-${index}`} className="flex items-baseline font-normal">
                   <span className="shrink-0">{intervention.name}</span>
                   <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
                   <span className="shrink-0">{(intervention.amountHT || 0).toLocaleString("fr-FR")} FCFA</span>
                 </div>
               ))}
-              <div className="flex items-baseline">
+              <div className={`flex items-baseline ${showSeparatedTotals ? 'font-bold' : ''}`}>
                 <span className="shrink-0">{showSeparatedTotals ? 'Total HT' : 'Soit au forfait'}</span>
                 <span className="flex-1 border-b border-dotted border-foreground/50 mx-2 mb-1"></span>
-                <span className="font-medium shrink-0">{invoice.amountHT.toLocaleString("fr-FR")} FCFA</span>
+                <span className="shrink-0">{invoice.amountHT.toLocaleString("fr-FR")} FCFA</span>
               </div>
               {invoice.tvaRate > 0 && (
                 <div className="flex items-baseline">

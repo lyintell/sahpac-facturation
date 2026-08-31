@@ -89,11 +89,6 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
             description: editingInvoice.interventionDescription,
             standardPrice: editingInvoice.amountHT,
           }];
-      const defaultInterventionAmount = invoiceInterventions.reduce(
-        (total, intervention) => total + (intervention.standardPrice || 0),
-        0
-      );
-
       setSelectedClientId(editingInvoice.clientId);
       setWorkDescription(editingInvoice.workDescription);
       setSelectedInterventions(
@@ -101,18 +96,25 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
           invoiceInterventions.map((intervention) => ({
             id: intervention.id,
             description: intervention.description,
-            amountHT: intervention.amountHT !== undefined
-              ? intervention.amountHT.toString()
-              : (intervention.standardPrice || 0).toString(),
+            amountHT: (() => {
+              const lineAmount = intervention.amountHT ?? intervention.standardPrice ?? 0;
+              if (lineAmount) {
+                return lineAmount.toString();
+              }
+              if (invoiceInterventions.length === 1 && editingInvoice.amountHT) {
+                return editingInvoice.amountHT.toString();
+              }
+              return '';
+            })(),
           }))
         )
       );
       setSelectedZones(editingInvoice.zones);
       setFrequency(editingInvoice.frequency);
       setFindings(editingInvoice.findings);
-      setAmountHT(editingInvoice.amountHT.toString());
+      setAmountHT(editingInvoice.amountHT ? editingInvoice.amountHT.toString() : '');
       setSeparateTotalsByInterventionType(editingInvoice.separateTotalsByInterventionType === true);
-      setIsAmountManuallyEdited(defaultInterventionAmount !== editingInvoice.amountHT);
+      setIsAmountManuallyEdited(true);
       setIncludeTva(editingInvoice.tvaRate > 0);
       setIsProForma(editingInvoice.isProForma !== false);
       setObservations(editingInvoice.observations || '');
@@ -194,16 +196,26 @@ const InvoiceForm = ({ clients, invoices, zones, interventionTypes, editingInvoi
   }, [invoices, selectedZones, zones]);
 
   useEffect(() => {
+    if (editingInvoice) {
+      return;
+    }
+
     if (!separateTotalsByInterventionType && !isAmountManuallyEdited) {
       setAmountHT(defaultAmountHT > 0 ? defaultAmountHT.toString() : '');
     }
-  }, [defaultAmountHT, isAmountManuallyEdited, separateTotalsByInterventionType]);
+  }, [editingInvoice, defaultAmountHT, isAmountManuallyEdited, separateTotalsByInterventionType]);
 
   useEffect(() => {
-    if (separateTotalsByInterventionType) {
-      setAmountHT(separatedAmountHT > 0 ? separatedAmountHT.toString() : '');
+    if (!separateTotalsByInterventionType) {
+      return;
     }
-  }, [separateTotalsByInterventionType, separatedAmountHT]);
+
+    if (separatedAmountHT > 0) {
+      setAmountHT(separatedAmountHT.toString());
+    } else if (!editingInvoice) {
+      setAmountHT('');
+    }
+  }, [editingInvoice, separateTotalsByInterventionType, separatedAmountHT]);
 
   useEffect(() => {
     if (activeInterventions.length <= 1 && separateTotalsByInterventionType) {
